@@ -1,15 +1,22 @@
 #include <iostream>
 #include <string>
+#include <limits>
 
-#include "structures.h"
+#include "functions.h"
+
+#define FLUSH cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+//while (cin.get() != '\n');
+
 
 using std::string;
 using std::cout;
 using std::cin;
 using std::endl;
 
-void help()
+void printHelp()
 {
+	cout << "Инструкции: " << endl;
+
 	cout << "1 - Добавить трубу" << endl;
 	cout << "2 - Добавить КС" << endl;
 	cout << "3 - Просмотр всех объектов" << endl;
@@ -25,30 +32,52 @@ int main()
 	setlocale(LC_ALL, "ru");
 
 	cout << "Добро пожаловать в высокотехнологичный НГ-менеджер!" << endl;
-	cout << "Инструкции: " << endl;
-	help();
+	printHelp();
 
-	unsigned short ch;
+	unsigned short choice;
+	Pipe p;
+	CS cs;
 	
 	while (true)
 	{
 		cout << "Введите нoмер: ";
-		cin >> ch;
+		cin >> choice;
 
 		if (cin.fail())
 		{
 			cout << "Введите корректный номер!" << endl << endl;
 
 			cin.clear();
-			while (cin.get() != '\n');
+			FLUSH
 			continue;
 		}
 
-		switch (ch)
+		FLUSH
+		switch (choice)
 		{
 		case 1:
+			system("cls");
+			addPipe(p);
+
+			cout << "\nГотово! Нажмите Enter...";
+			cin.get();
+			FLUSH
+
+			system("cls");
+			printHelp();
+
 			break;
 		case 2:
+			system("cls");
+			addCS(cs);
+
+			cout << "\nГотово! Нажмите Enter...";
+			cin.get();
+			FLUSH
+
+			system("cls");
+			printHelp();
+
 			break;
 		case 3:
 			break;
@@ -69,4 +98,6 @@ int main()
 		}
 
 	}
+
+	return 0;
 }

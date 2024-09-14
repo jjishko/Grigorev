@@ -1,11 +1,11 @@
 #pragma once
 #include <string>
 
-struct pipe
+struct Pipe
 {
 	std::string kmMark = "Mimi 36";
-	unsigned int length = 1;
-	unsigned int diameter = 1;
+	float length = 1;
+	float diameter = 1;
 	bool isUnderRepair = false;
 };
 
@@ -14,5 +14,8 @@ struct CS
 	std::string name = "CS 1";
 	unsigned int guildCount = 10;
 	unsigned int guildCountInWork = 5;
-	int efficiency = 10;
+	float efficiency = 10;
 };
+
+int addPipe(Pipe& p);
+int addCS(CS& cs);
