@@ -1,12 +1,11 @@
 #include <iostream>
 #include <string>
 #include <limits>
+#include <conio.h>
 
 #include "functions.h"
 
-#define FLUSH cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-//while (cin.get() != '\n');
-
+#define FLUSH while (cin.get() != '\n');
 
 using std::string;
 using std::cout;
@@ -53,14 +52,14 @@ int main()
 		}
 
 		FLUSH
+
 		switch (choice)
 		{
 		case 1:
 			system("cls");
 			addPipe(p);
 
-			cout << "\nГотово! Нажмите Enter...";
-			cin.get();
+			cout << "\nГотово! Нажмите любую клавишу...";
 			FLUSH
 
 			system("cls");
@@ -71,8 +70,7 @@ int main()
 			system("cls");
 			addCS(cs);
 
-			cout << "\nГотово! Нажмите Enter...";
-			cin.get();
+			cout << "\nГотово! Нажмите любую клавишу...";
 			FLUSH
 
 			system("cls");
@@ -80,17 +78,44 @@ int main()
 
 			break;
 		case 3:
+			system("cls");
+			printObjects(p, cs);
+
+			cout << "\n\nГотово! Нажмите любую клавишу...";
+			FLUSH
+
+			system("cls");
+			printHelp();
+
 			break;
 		case 4:
+			system("cls");
+			redactPipe(p);
+
+			cout << "\nГотово! Нажмите любую клавишу...";
+			FLUSH
+
+			system("cls");
+			printHelp();
+
 			break;
 		case 5:
+			system("cls");
+			redactCS(cs);
+
+			cout << "\nГотово! Нажмите любую клавишу...";
+			FLUSH
+
+			system("cls");
+			printHelp();
+
 			break;
 		case 6:
 			break;
 		case 7:
 			break;
 		case 0:
-			cout << "До новых встреч!";
+			cout << "До новых встреч!" << endl;
 			return 0;
 		default:
 			cout << "Введите корректный номер!" << endl << endl;

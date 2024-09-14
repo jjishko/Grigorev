@@ -3,7 +3,7 @@
 
 struct Pipe
 {
-	std::string kmMark = "Mimi 36";
+	std::string kmMark = "Default";
 	float length = 1;
 	float diameter = 1;
 	bool isUnderRepair = false;
@@ -11,11 +11,16 @@ struct Pipe
 
 struct CS
 {
-	std::string name = "CS 1";
+	std::string name = "Default";
 	unsigned int guildCount = 10;
 	unsigned int guildCountInWork = 5;
 	float efficiency = 10;
 };
 
-int addPipe(Pipe& p);
-int addCS(CS& cs);
+void addPipe(Pipe& p);
+void addCS(CS& cs);
+
+void printObjects(Pipe& p, CS& cs);
+
+void redactPipe(Pipe& p);
+void redactCS(CS& cs);

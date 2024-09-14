@@ -3,7 +3,7 @@
 
 #include "functions.h"
 
-#define FLUSH cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+#define FLUSH while (cin.get() != '\n');
 
 using std::string;
 using std::cout;
@@ -18,16 +18,12 @@ void resetInput()
 	FLUSH	
 }
 
-int addPipe(Pipe& p)
+void addPipe(Pipe& p)
 {
-	string kmMarkInp;
-	float lengthInp, diameterInp;
-	bool isUnderRepairInp;
-	
 	while (true)
 	{
 		cout << "Введите километровую отметку (название): ";
-		std::getline(cin, kmMarkInp);
+		std::getline(cin, p.kmMark);
 
 		if (cin.fail())
 		{
@@ -35,7 +31,6 @@ int addPipe(Pipe& p)
 			continue;
 		}
 
-		p.kmMark = kmMarkInp;
 		break;
 	}
 	
@@ -43,16 +38,15 @@ int addPipe(Pipe& p)
 	while (true)
 	{
 		cout << "Введите длину трубы: ";
-		cin >> lengthInp;
+		cin >> p.length;
 
-		if (lengthInp <= 0 || cin.fail())
+		if (p.length <= 0 || cin.fail())
 		{
 			resetInput();
 			continue;
 		}
 
 		FLUSH
-		p.length = lengthInp;
 		break;
 	}
 	
@@ -60,16 +54,15 @@ int addPipe(Pipe& p)
 	while (true)
 	{
 		cout << "Введите диаметр трубы: ";
-		cin >> diameterInp;
+		cin >> p.diameter;
 
-		if (diameterInp <= 0 || cin.fail())
+		if (p.diameter <= 0 || cin.fail())
 		{
 			resetInput();
 			continue;
 		}
 
 		FLUSH
-		p.diameter = diameterInp;
 		break;
 	}
 	
@@ -77,7 +70,7 @@ int addPipe(Pipe& p)
 	while (true)
 	{
 		cout << "Труба в ремонте? (1 - да, 0 - нет): ";
-		cin >> isUnderRepairInp;
+		cin >> p.isUnderRepair;
 
 		if (cin.fail())
 		{
@@ -86,23 +79,17 @@ int addPipe(Pipe& p)
 		}
 
 		FLUSH
-		p.isUnderRepair = isUnderRepairInp;
 		break;
 	}
 	
-	return 0;
 }
 
-int addCS(CS& cs)
+void addCS(CS& cs)
 {
-	string nameInp;
-	int guildCountInp, guildCountInWorkInp;
-	float efficiencyInp;
-
 	while (true)
 	{
 		cout << "Введите название КС: ";
-		std::getline(cin, nameInp);
+		std::getline(cin, cs.name);
 
 		if (cin.fail())
 		{
@@ -110,7 +97,6 @@ int addCS(CS& cs)
 			continue;
 		}
 
-		cs.name = nameInp;
 		break;
 	}
 
@@ -118,16 +104,15 @@ int addCS(CS& cs)
 	while (true)
 	{
 		cout << "Введите кол-во цехов: ";
-		cin >> guildCountInp;
+		cin >> cs.guildCount;
 
-		if (guildCountInp < 1 || cin.fail())
+		if (cs.guildCount < 1 || cin.fail())
 		{
 			resetInput();
 			continue;
 		}
 
 		FLUSH
-		cs.guildCount = guildCountInp;
 		break;
 	}
 
@@ -135,9 +120,9 @@ int addCS(CS& cs)
 	while (true)
 	{
 		cout << "Введите кол-во цехов в работе: ";
-		cin >> guildCountInWorkInp;
+		cin >> cs.guildCountInWork;
 
-		if (guildCountInWorkInp <= 0 || guildCountInWorkInp > cs.guildCount
+		if (cs.guildCountInWork <= 0 || cs.guildCountInWork > cs.guildCount
 			|| cin.fail())
 		{
 			resetInput();
@@ -145,7 +130,6 @@ int addCS(CS& cs)
 		}
 
 		FLUSH
-		cs.guildCountInWork = guildCountInWorkInp;
 		break;
 	}
 
@@ -153,7 +137,7 @@ int addCS(CS& cs)
 	while (true)
 	{
 		cout << "Введите коэффициент эффективности КС: ";
-		cin >> efficiencyInp;
+		cin >> cs.efficiency;
 
 		if (cin.fail())
 		{
@@ -162,9 +146,236 @@ int addCS(CS& cs)
 		}
 
 		FLUSH
-		cs.efficiency = efficiencyInp;
 		break;
 	}
 
-	return 0;
+}
+
+void printObjects(Pipe& p, CS& cs)
+{
+	cout << "Километровая отметка (название) трубы: " << p.kmMark << endl;
+	cout << "Длина трубы: " << p.length << endl;
+	cout << "Диаметр трубы: " << p.diameter << endl;
+	cout << "Статус: " << (p.isUnderRepair ? "В ремонте" : "Работает") << endl;
+
+	cout << endl;
+
+	cout << "Название КС: " << cs.name << endl;
+	cout << "Кол-во цехов: " << cs.guildCount << endl;
+	cout << "Кол-во цехов в работе: " << cs.guildCountInWork << endl;
+	cout << "Коэффициент эффективности: " << cs.efficiency << endl;
+}
+
+void redactPipe(Pipe& p)
+{
+	int choice;
+
+	cout << "1) Изменить км-отметку (название) трубы" << endl;
+	cout << "2) Изменить длину трубы" << endl;
+	cout << "3) Изменить диаметр трубы" << endl;
+	cout << "4) Изменить статус трубы" << endl;
+
+
+	while (true)
+	{
+		cout << "Введите цифру: ";
+		cin >> choice;
+
+		if (choice < 1 && choice > 4 || cin.fail())
+		{
+			resetInput();
+			continue;
+		}
+
+		FLUSH
+		break;
+	}
+
+	cout << endl;
+
+	switch (choice)
+	{
+	case 1:
+
+		while(true)
+		{
+			cout << "Введите километровую отметку (название): ";
+			std::getline(cin, p.kmMark);
+
+			if (cin.fail())
+			{
+				resetInput();
+				continue;
+			}
+
+			break;
+		}
+
+		break;
+
+	case 2:
+
+		while (true)
+		{
+			cout << "Введите длину трубы: ";
+			cin >> p.length;
+
+			if (p.length <= 0 || cin.fail())
+			{
+				resetInput();
+				continue;
+			}
+
+			FLUSH
+			break;
+		}
+
+		break;
+
+	case 3:
+
+		while (true)
+		{
+			cout << "Введите диаметр трубы: ";
+			cin >> p.diameter;
+
+			if (p.diameter <= 0 || cin.fail())
+			{
+				resetInput();
+				continue;
+			}
+
+			FLUSH
+				break;
+		}
+
+		break;
+
+	case 4:
+
+		while (true)
+		{
+			cout << "Труба в ремонте? (1 - да, 0 - нет): ";
+			cin >> p.isUnderRepair;
+
+			if (cin.fail())
+			{
+				resetInput();
+				continue;
+			}
+
+			FLUSH
+				break;
+		}
+		
+		break;
+	}
+		
+}
+
+void redactCS(CS& cs)
+{
+	int choice;
+
+	cout << "1) Изменить название КС" << endl;
+	cout << "2) Изменить кол-во цехов в КС" << endl;
+	cout << "3) Изменить кол-во цехов в работе" << endl;
+	cout << "4) Изменить коэффициент эффективности КС" << endl;
+
+
+	while (true)
+	{
+		cout << "Введите цифру: ";
+		cin >> choice;
+
+		if (choice < 1 && choice > 4 || cin.fail())
+		{
+			resetInput();
+			continue;
+		}
+
+		FLUSH
+			break;
+	}
+
+	cout << endl;
+
+	switch (choice)
+	{
+	case 1:
+
+		while (true)
+		{
+			cout << "Введите название КС: ";
+			std::getline(cin, cs.name);
+
+			if (cin.fail())
+			{
+				resetInput();
+				continue;
+			}
+
+			break;
+		}
+
+
+	case 2:
+
+		while (true)
+		{
+			cout << "Введите кол-во цехов: ";
+			cin >> cs.guildCount;
+
+			if (cs.guildCount < 1 || cin.fail())
+			{
+				resetInput();
+				continue;
+			}
+
+			FLUSH
+			break;
+		}
+
+		break;
+
+	case 3:
+
+		while (true)
+		{
+			cout << "Введите кол-во цехов в работе: ";
+			cin >> cs.guildCountInWork;
+
+			if (cs.guildCountInWork <= 0 || cs.guildCountInWork > cs.guildCount
+				|| cin.fail())
+			{
+				resetInput();
+				continue;
+			}
+
+			FLUSH
+			break;
+		}
+
+		break;
+
+	case 4:
+
+		while(true)
+		{
+			cout << "Введите коэффициент эффективности КС: ";
+			cin >> cs.efficiency;
+
+			if (cin.fail())
+			{
+				resetInput();
+				continue;
+			}
+
+			FLUSH
+			break;
+		}
+
+		break;
+	}
+	
 }
