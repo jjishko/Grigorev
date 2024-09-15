@@ -24,3 +24,6 @@ void printObjects(Pipe& p, CS& cs);
 
 void redactPipe(Pipe& p);
 void redactCS(CS& cs);
+
+void saveObjects(Pipe& p, CS& cs);
+void loadObjects(Pipe& p, CS& cs);

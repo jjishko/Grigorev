@@ -111,8 +111,26 @@ int main()
 
 			break;
 		case 6:
+			system("cls");
+			saveObjects(p, cs);
+
+			cout << "Нажмите любую клавишу...";
+			FLUSH
+
+			system("cls");
+			printHelp();
+
 			break;
 		case 7:
+			system("cls");
+			loadObjects(p, cs);
+
+			cout << "Нажмите любую клавишу...";
+			FLUSH
+
+			system("cls");
+			printHelp();
+
 			break;
 		case 0:
 			cout << "До новых встреч!" << endl;

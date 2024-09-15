@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <fstream>
 
 #include "functions.h"
 
@@ -342,7 +343,8 @@ void redactCS(CS& cs)
 
 		while (true)
 		{
-			cout << "Введите кол-во цехов в работе: ";
+			cout << "Введите кол-во цехов в работе ";
+			cout << "(всего цехов - " << cs.guildCount << "): ";
 			cin >> cs.guildCountInWork;
 
 			if (cs.guildCountInWork <= 0 || cs.guildCountInWork > cs.guildCount
@@ -378,4 +380,66 @@ void redactCS(CS& cs)
 		break;
 	}
 	
+}
+
+void saveObjects(Pipe& p, CS& cs)
+{
+	std::ofstream f("data.txt");
+
+	if (!f.is_open())
+	{
+		cout << "Ошибка: файл для сохранения не найден!" << endl;
+		return;
+	}
+
+	f << p.kmMark << endl;
+	f << p.length << " ";
+	f << p.diameter << " ";
+	f << p.isUnderRepair << endl;
+
+	f << cs.name << endl;
+	f << cs.guildCount << " ";
+	f << cs.guildCountInWork << " ";
+	f << cs.efficiency;
+
+	f.close();
+
+	cout << "Данные сохранены! ";
+}
+
+void loadObjects(Pipe& p, CS& cs)
+{
+	std::ifstream f("data.txt");
+	
+	if (!f.is_open())
+	{
+		cout << "Ошибка: файл для сохранения не найден!" << endl;
+		return;
+	}
+
+	std::getline(f, p.kmMark);
+	f >> p.length >> p.diameter >> p.isUnderRepair;
+
+	if (f.fail())
+	{
+		cout << "Ошибка: некорректное считывание из файла!" << endl;
+		return;
+	}
+
+	f.get();
+
+	std::getline(f, cs.name);
+	f >> cs.guildCount >> cs.guildCountInWork 
+		>> cs.efficiency;
+
+	if (f.fail())
+	{
+		cout << "Ошибка: некорректное считывание из файла!" << endl;
+		return;
+	}
+
+	f.close();
+
+	cout << "Данные загружены! ";
+
 }
