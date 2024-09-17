@@ -59,7 +59,7 @@ int main()
 			system("cls");
 			addPipe(p);
 
-			cout << "\nГотово! Нажмите любую клавишу...";
+			cout << "\nГотово! Нажмите Enter...";
 			FLUSH
 
 			system("cls");
@@ -70,7 +70,7 @@ int main()
 			system("cls");
 			addCS(cs);
 
-			cout << "\nГотово! Нажмите любую клавишу...";
+			cout << "\nГотово! Нажмите Enter...";
 			FLUSH
 
 			system("cls");
@@ -81,7 +81,7 @@ int main()
 			system("cls");
 			printObjects(p, cs);
 
-			cout << "\n\nГотово! Нажмите любую клавишу...";
+			cout << "\n\nГотово! Нажмите Enter...";
 			FLUSH
 
 			system("cls");
@@ -92,7 +92,7 @@ int main()
 			system("cls");
 			redactPipe(p);
 
-			cout << "\nГотово! Нажмите любую клавишу...";
+			cout << "\nГотово! Нажмите Enter...";
 			FLUSH
 
 			system("cls");
@@ -103,7 +103,7 @@ int main()
 			system("cls");
 			redactCS(cs);
 
-			cout << "\nГотово! Нажмите любую клавишу...";
+			cout << "\nНажмите Enter...";
 			FLUSH
 
 			system("cls");
@@ -114,7 +114,7 @@ int main()
 			system("cls");
 			saveObjects(p, cs);
 
-			cout << "Нажмите любую клавишу...";
+			cout << "Нажмите Enter...";
 			FLUSH
 
 			system("cls");
@@ -125,7 +125,7 @@ int main()
 			system("cls");
 			loadObjects(p, cs);
 
-			cout << "Нажмите любую клавишу...";
+			cout << "Нажмите Enter...";
 			FLUSH
 
 			system("cls");

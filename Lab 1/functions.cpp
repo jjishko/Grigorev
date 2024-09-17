@@ -57,7 +57,7 @@ void addPipe(Pipe& p)
 		cout << "Введите диаметр трубы: ";
 		cin >> p.diameter;
 
-		if (p.diameter <= 0 || cin.fail())
+		if (p.diameter < 1 || cin.fail())
 		{
 			resetInput();
 			continue;
@@ -154,227 +154,97 @@ void addCS(CS& cs)
 
 void printObjects(Pipe& p, CS& cs)
 {
-	cout << "Километровая отметка (название) трубы: " << p.kmMark << endl;
-	cout << "Длина трубы: " << p.length << endl;
-	cout << "Диаметр трубы: " << p.diameter << endl;
-	cout << "Статус: " << (p.isUnderRepair ? "В ремонте" : "Работает") << endl;
-
+	if (p.kmMark == "")
+	{
+		cout << "Данные трубы отсутствуют!" << endl;
+	}
+	else
+	{
+		cout << "Километровая отметка (название) трубы: " << p.kmMark << endl;
+		cout << "Длина трубы: " << p.length << endl;
+		cout << "Диаметр трубы: " << p.diameter << endl;
+		cout << "Статус: " << (p.isUnderRepair ? "В ремонте" : "Работает") << endl;
+	}
+	
 	cout << endl;
 
-	cout << "Название КС: " << cs.name << endl;
-	cout << "Кол-во цехов: " << cs.guildCount << endl;
-	cout << "Кол-во цехов в работе: " << cs.guildCountInWork << endl;
-	cout << "Коэффициент эффективности: " << cs.efficiency << endl;
+	if (cs.name == "")
+	{
+		cout << "Данные КС отсутствуют!" << endl;
+
+	}
+	else
+	{
+		cout << "Название КС: " << cs.name << endl;
+		cout << "Кол-во цехов: " << cs.guildCount << endl;
+		cout << "Кол-во цехов в работе: " << cs.guildCountInWork << endl;
+		cout << "Коэффициент эффективности: " << cs.efficiency << endl;
+	}
+	
 }
 
 void redactPipe(Pipe& p)
 {
-	int choice;
-
-	cout << "1) Изменить км-отметку (название) трубы" << endl;
-	cout << "2) Изменить длину трубы" << endl;
-	cout << "3) Изменить диаметр трубы" << endl;
-	cout << "4) Изменить статус трубы" << endl;
-
-
-	while (true)
+	if (p.kmMark == "")
 	{
-		cout << "Введите цифру: ";
-		cin >> choice;
-
-		if (choice < 1 && choice > 4 || cin.fail())
-		{
-			resetInput();
-			continue;
-		}
-
-		FLUSH
-		break;
+		cout << "Ошибка: Данные трубы отсутствуют!" << endl;
+		return;
 	}
 
-	cout << endl;
+	cout << "Труба в ремонте? (1 - да, 0 - нет): ";
+	cin >> p.isUnderRepair;
 
-	switch (choice)
+	if (cin.fail())
 	{
-	case 1:
-
-		while(true)
-		{
-			cout << "Введите километровую отметку (название): ";
-			std::getline(cin, p.kmMark);
-
-			if (cin.fail())
-			{
-				resetInput();
-				continue;
-			}
-
-			break;
-		}
-
-		break;
-
-	case 2:
-
-		while (true)
-		{
-			cout << "Введите длину трубы: ";
-			cin >> p.length;
-
-			if (p.length <= 0 || cin.fail())
-			{
-				resetInput();
-				continue;
-			}
-
-			FLUSH
-			break;
-		}
-
-		break;
-
-	case 3:
-
-		while (true)
-		{
-			cout << "Введите диаметр трубы: ";
-			cin >> p.diameter;
-
-			if (p.diameter <= 0 || cin.fail())
-			{
-				resetInput();
-				continue;
-			}
-
-			FLUSH
-				break;
-		}
-
-		break;
-
-	case 4:
-
-		while (true)
-		{
-			cout << "Труба в ремонте? (1 - да, 0 - нет): ";
-			cin >> p.isUnderRepair;
-
-			if (cin.fail())
-			{
-				resetInput();
-				continue;
-			}
-
-			FLUSH
-				break;
-		}
-		
-		break;
+		resetInput();
 	}
-		
+
+	FLUSH		
 }
 
 void redactCS(CS& cs)
 {
-	int choice;
+	if (cs.name == "")
+	{
+		cout << "Ошбика: Данные КС отсутствуют!" << endl;
+		return;
+	}
 
-	cout << "1) Изменить название КС" << endl;
-	cout << "2) Изменить кол-во цехов в КС" << endl;
-	cout << "3) Изменить кол-во цехов в работе" << endl;
-	cout << "4) Изменить коэффициент эффективности КС" << endl;
+	int increase;
 
+	cout << "Добавить цех - 1, убрать - 0" << endl;
 
 	while (true)
 	{
-		cout << "Введите цифру: ";
-		cin >> choice;
+		cout << "Введите номер: ";
+		cin >> increase;
 
-		if (choice < 1 && choice > 4 || cin.fail())
+		if (increase < 0 || increase > 1 || cin.fail())
 		{
 			resetInput();
-			continue;
 		}
 
 		FLUSH
-			break;
-	}
 
-	cout << endl;
-
-	switch (choice)
-	{
-	case 1:
-
-		while (true)
+		if (increase)
 		{
-			cout << "Введите название КС: ";
-			std::getline(cin, cs.name);
-
-			if (cin.fail())
+			if (cs.guildCount == cs.guildCountInWork)
 			{
-				resetInput();
-				continue;
+				cout << "Ошибка: Кол-во рабочих цехов превышено!" << endl;
+				return;
 			}
 
-			break;
+			++cs.guildCountInWork;
 		}
-
-
-	case 2:
-
-		while (true)
+		else
 		{
-			cout << "Введите кол-во цехов: ";
-			cin >> cs.guildCount;
-
-			if (cs.guildCount < 1 || cin.fail())
+			if (cs.guildCountInWork == 0)
 			{
-				resetInput();
-				continue;
+				cout << "Ошибка: Кол-во рабочих цехов равно нулю!" << endl;
+				return;
 			}
 
-			FLUSH
-			break;
-		}
-
-		break;
-
-	case 3:
-
-		while (true)
-		{
-			cout << "Введите кол-во цехов в работе ";
-			cout << "(всего цехов - " << cs.guildCount << "): ";
-			cin >> cs.guildCountInWork;
-
-			if (cs.guildCountInWork <= 0 || cs.guildCountInWork > cs.guildCount
-				|| cin.fail())
-			{
-				resetInput();
-				continue;
-			}
-
-			FLUSH
-			break;
-		}
-
-		break;
-
-	case 4:
-
-		while(true)
-		{
-			cout << "Введите коэффициент эффективности КС: ";
-			cin >> cs.efficiency;
-
-			if (cin.fail())
-			{
-				resetInput();
-				continue;
-			}
-
-			FLUSH
-			break;
+			--cs.guildCountInWork;
 		}
 
 		break;
@@ -384,6 +254,12 @@ void redactCS(CS& cs)
 
 void saveObjects(Pipe& p, CS& cs)
 {
+	if (cs.name == "" && p.kmMark == "")
+	{
+		cout << "Ошбика: Данные отсутствуют!" << endl;
+		return;
+	}
+
 	std::ofstream f("data.txt");
 
 	if (!f.is_open())
@@ -392,28 +268,45 @@ void saveObjects(Pipe& p, CS& cs)
 		return;
 	}
 
-	f << p.kmMark << endl;
-	f << p.length << " ";
-	f << p.diameter << " ";
-	f << p.isUnderRepair << endl;
+	if (p.kmMark == "")
+	{
+		cout << "Данные трубы отсутствуют!" << endl;
+	}
+	else
+	{
+		f << p.kmMark << endl;
+		f << p.length << " ";
+		f << p.diameter << " ";
+		f << p.isUnderRepair << endl;
 
-	f << cs.name << endl;
-	f << cs.guildCount << " ";
-	f << cs.guildCountInWork << " ";
-	f << cs.efficiency;
+		cout << "Данные трубы сохранены! ";
+	}
+	
+	if (cs.name == "")
+	{
+		cout << "Данные КС отсутствуют!" << endl;
+	}
+	else
+	{
+		f << cs.name << endl;
+		f << cs.guildCount << " ";
+		f << cs.guildCountInWork << " ";
+		f << cs.efficiency;
+
+		cout << "Данные КС сохранены! " << endl;
+	}
 
 	f.close();
 
-	cout << "Данные сохранены! ";
 }
 
 void loadObjects(Pipe& p, CS& cs)
 {
 	std::ifstream f("data.txt");
 	
-	if (!f.is_open())
+	if (!f.is_open() || f.peek() == EOF)
 	{
-		cout << "Ошибка: файл для сохранения не найден!" << endl;
+		cout << "Ошибка: файл для сохранения не найден или пуст!" << endl;
 		return;
 	}
 
@@ -425,6 +318,8 @@ void loadObjects(Pipe& p, CS& cs)
 		cout << "Ошибка: некорректное считывание из файла!" << endl;
 		return;
 	}
+
+	cout << "Труба загружена!" << endl;
 
 	f.get();
 
@@ -438,8 +333,8 @@ void loadObjects(Pipe& p, CS& cs)
 		return;
 	}
 
-	f.close();
+	cout << "КС загружена!" << endl;
 
-	cout << "Данные загружены! ";
+	f.close();
 
 }

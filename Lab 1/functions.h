@@ -3,18 +3,18 @@
 
 struct Pipe
 {
-	std::string kmMark = "Default";
-	float length = 1;
-	float diameter = 1;
-	bool isUnderRepair = false;
+	std::string kmMark;
+	float length;
+	int diameter;
+	bool isUnderRepair;
 };
 
 struct CS
 {
-	std::string name = "Default";
-	unsigned int guildCount = 10;
-	unsigned int guildCountInWork = 5;
-	float efficiency = 10;
+	std::string name;
+	unsigned int guildCount;
+	unsigned int guildCountInWork;
+	float efficiency;
 };
 
 void addPipe(Pipe& p);
