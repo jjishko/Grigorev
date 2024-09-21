@@ -4,19 +4,34 @@
 
 #include "functions.h"
 
-#define FLUSH while (cin.get() != '\n');
-
+using std::ofstream;
+using std::ifstream;
 using std::string;
 using std::cout;
 using std::cin;
 using std::endl;
+
+//ofstream& operator << (ofstream & out, const Pipe & p)
+//{
+//	out << "Километровая отметка (название) трубы: " << p.kmMark << endl;
+//	out << "Длина трубы: " << p.length << endl;
+//	out << "Диаметр трубы: " << p.diameter << endl;
+//	out << "Статус: " << (p.isUnderRepair ? "В ремонте" : "Работает") << endl;
+//
+//	return out;
+//}
+
+void flush()
+{
+	cin.ignore(10000, '\n');
+}
 
 void resetInput()
 {
 	cout << "Введите корректное значение!" << endl << endl;
 
 	cin.clear();
-	FLUSH	
+	flush();	
 }
 
 void addPipe(Pipe& p)
@@ -47,7 +62,7 @@ void addPipe(Pipe& p)
 			continue;
 		}
 
-		FLUSH
+		flush();
 		break;
 	}
 	
@@ -63,7 +78,7 @@ void addPipe(Pipe& p)
 			continue;
 		}
 
-		FLUSH
+		flush();
 		break;
 	}
 	
@@ -79,9 +94,11 @@ void addPipe(Pipe& p)
 			continue;
 		}
 
-		FLUSH
+		flush();
 		break;
 	}
+
+	cout << endl << "Труба инициализирована!" << endl;
 	
 }
 
@@ -113,7 +130,7 @@ void addCS(CS& cs)
 			continue;
 		}
 
-		FLUSH
+		flush();
 		break;
 	}
 
@@ -130,7 +147,7 @@ void addCS(CS& cs)
 			continue;
 		}
 
-		FLUSH
+		flush();
 		break;
 	}
 
@@ -146,10 +163,11 @@ void addCS(CS& cs)
 			continue;
 		}
 
-		FLUSH
+		flush();
 		break;
 	}
 
+	cout << endl << "КС инициализирована!" << endl;
 }
 
 void printObjects(Pipe& p, CS& cs)
@@ -170,7 +188,7 @@ void printObjects(Pipe& p, CS& cs)
 
 	if (cs.name == "")
 	{
-		cout << "Данные КС отсутствуют!" << endl;
+		cout << "Данные КС отсутствуют!" << endl << endl;
 
 	}
 	else
@@ -178,9 +196,11 @@ void printObjects(Pipe& p, CS& cs)
 		cout << "Название КС: " << cs.name << endl;
 		cout << "Кол-во цехов: " << cs.guildCount << endl;
 		cout << "Кол-во цехов в работе: " << cs.guildCountInWork << endl;
-		cout << "Коэффициент эффективности: " << cs.efficiency << endl;
+		cout << "Коэффициент эффективности: " << cs.efficiency << endl << endl;
 	}
 	
+	cout << "Готово!" << endl;
+
 }
 
 void redactPipe(Pipe& p)
@@ -199,7 +219,10 @@ void redactPipe(Pipe& p)
 		resetInput();
 	}
 
-	FLUSH		
+	flush();	
+
+	cout << "Статус изменен!" << endl;
+
 }
 
 void redactCS(CS& cs)
@@ -224,7 +247,7 @@ void redactCS(CS& cs)
 			resetInput();
 		}
 
-		FLUSH
+		flush();
 
 		if (increase)
 		{
@@ -250,16 +273,11 @@ void redactCS(CS& cs)
 		break;
 	}
 	
+	cout << "Готово!" << endl;
 }
 
 void saveObjects(Pipe& p, CS& cs)
 {
-	if (cs.name == "" && p.kmMark == "")
-	{
-		cout << "Ошбика: Данные отсутствуют!" << endl;
-		return;
-	}
-
 	std::ofstream f("data.txt");
 
 	if (!f.is_open())
@@ -268,9 +286,17 @@ void saveObjects(Pipe& p, CS& cs)
 		return;
 	}
 
+	if (cs.name == "" && p.kmMark == "")
+	{
+		cout << "Ошбика: Данные отсутствуют!" << endl;
+		f << '-' << endl << '-' << endl;
+		return;
+	}
+
 	if (p.kmMark == "")
 	{
 		cout << "Данные трубы отсутствуют!" << endl;
+		f << '-' << endl;
 	}
 	else
 	{
@@ -285,6 +311,7 @@ void saveObjects(Pipe& p, CS& cs)
 	if (cs.name == "")
 	{
 		cout << "Данные КС отсутствуют!" << endl;
+		f << '-';
 	}
 	else
 	{
@@ -303,38 +330,53 @@ void saveObjects(Pipe& p, CS& cs)
 void loadObjects(Pipe& p, CS& cs)
 {
 	std::ifstream f("data.txt");
-	
+
 	if (!f.is_open() || f.peek() == EOF)
 	{
 		cout << "Ошибка: файл для сохранения не найден или пуст!" << endl;
 		return;
 	}
 
-	std::getline(f, p.kmMark);
-	f >> p.length >> p.diameter >> p.isUnderRepair;
-
-	if (f.fail())
+	if (f.peek() == '-')
 	{
-		cout << "Ошибка: некорректное считывание из файла!" << endl;
-		return;
+		cout << "Отсутствуют данные трубы!" << endl;
+		f.get();
 	}
+	else
+	{
+		std::getline(f, p.kmMark);
+		f >> p.length >> p.diameter >> p.isUnderRepair;
 
-	cout << "Труба загружена!" << endl;
+		if (f.fail())
+		{
+			cout << "Ошибка: некорректное считывание из файла!" << endl;
+			return;
+		}
+
+		cout << "Труба загружена!" << endl;
+	}
 
 	f.get();
 
-	std::getline(f, cs.name);
-	f >> cs.guildCount >> cs.guildCountInWork 
-		>> cs.efficiency;
-
-	if (f.fail())
+	if (f.peek() == '-')
 	{
-		cout << "Ошибка: некорректное считывание из файла!" << endl;
-		return;
+		cout << "Отсутствуют данные КС!" << endl;
+		f.get();
+	}
+	else
+	{
+		std::getline(f, cs.name);
+		f >> cs.guildCount >> cs.guildCountInWork
+			>> cs.efficiency;
+
+		if (f.fail())
+		{
+			cout << "Ошибка: некорректное считывание из файла!" << endl;
+			return;
+		}
+
+		cout << "КС загружена!" << endl;
 	}
 
-	cout << "КС загружена!" << endl;
-
 	f.close();
-
 }

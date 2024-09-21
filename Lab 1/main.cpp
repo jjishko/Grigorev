@@ -5,8 +5,6 @@
 
 #include "functions.h"
 
-#define FLUSH while (cin.get() != '\n');
-
 using std::string;
 using std::cout;
 using std::cin;
@@ -26,6 +24,7 @@ void printHelp()
 	cout << "0 - Выход" << endl << endl;
 }
 
+
 int main()
 {
 	setlocale(LC_ALL, "ru");
@@ -42,104 +41,57 @@ int main()
 		cout << "Введите нoмер: ";
 		cin >> choice;
 
-		if (cin.fail())
+		if (cin.fail() || choice > 7 || choice < 0)
 		{
 			cout << "Введите корректный номер!" << endl << endl;
 
 			cin.clear();
-			FLUSH
+			flush();
 			continue;
 		}
 
-		FLUSH
+		flush();
+		system("cls");
 
 		switch (choice)
 		{
 		case 1:
-			system("cls");
 			addPipe(p);
-
-			cout << "\nГотово! Нажмите Enter...";
-			FLUSH
-
-			system("cls");
-			printHelp();
-
 			break;
+
 		case 2:
-			system("cls");
 			addCS(cs);
-
-			cout << "\nГотово! Нажмите Enter...";
-			FLUSH
-
-			system("cls");
-			printHelp();
-
 			break;
+
 		case 3:
-			system("cls");
 			printObjects(p, cs);
-
-			cout << "\n\nГотово! Нажмите Enter...";
-			FLUSH
-
-			system("cls");
-			printHelp();
-
 			break;
+
 		case 4:
-			system("cls");
 			redactPipe(p);
-
-			cout << "\nГотово! Нажмите Enter...";
-			FLUSH
-
-			system("cls");
-			printHelp();
-
 			break;
+
 		case 5:
-			system("cls");
 			redactCS(cs);
-
-			cout << "\nНажмите Enter...";
-			FLUSH
-
-			system("cls");
-			printHelp();
-
 			break;
+
 		case 6:
-			system("cls");
 			saveObjects(p, cs);
-
-			cout << "Нажмите Enter...";
-			FLUSH
-
-			system("cls");
-			printHelp();
-
 			break;
+
 		case 7:
-			system("cls");
 			loadObjects(p, cs);
-
-			cout << "Нажмите Enter...";
-			FLUSH
-
-			system("cls");
-			printHelp();
-
 			break;
+
 		case 0:
 			cout << "До новых встреч!" << endl;
 			return 0;
-		default:
-			cout << "Введите корректный номер!" << endl << endl;
-			break;
 		}
 
+		cout << "Нажмите Enter...";
+		flush();
+		system("cls");
+		printHelp();
 	}
 
 	return 0;

@@ -17,6 +17,8 @@ struct CS
 	float efficiency;
 };
 
+void flush();
+
 void addPipe(Pipe& p);
 void addCS(CS& cs);
 
