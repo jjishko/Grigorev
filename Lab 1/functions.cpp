@@ -41,6 +41,12 @@ void addPipe(Pipe& p)
 		cout << "Введите километровую отметку (название): ";
 		std::getline(cin, p.kmMark);
 
+		if (p.kmMark == "")
+		{
+			cout << "Название обязательно!" << endl << endl;
+			continue;
+		}
+
 		if (cin.fail())
 		{
 			resetInput();
@@ -108,6 +114,12 @@ void addCS(CS& cs)
 	{
 		cout << "Введите название КС: ";
 		std::getline(cin, cs.name);
+
+		if (cs.name == "")
+		{
+			cout << "Название обязательно!" << endl << endl;
+			continue;
+		}
 
 		if (cin.fail())
 		{
@@ -278,28 +290,35 @@ void redactCS(CS& cs)
 
 void saveObjects(Pipe& p, CS& cs)
 {
-	std::ofstream f("data.txt");
+	string fileName;
+
+	cout << "Введите название файла или путь (без расширения): ";
+	std::getline(cin, fileName);
+
+	std::ofstream f(fileName + ".txt");
+	//std::ofstream f(fileName, std::ios::app);
 
 	if (!f.is_open())
 	{
-		cout << "Ошибка: файл для сохранения не найден!" << endl;
+		cout << "Ошибка: файл для сохранения недоступен!" << endl;
 		return;
 	}
 
 	if (cs.name == "" && p.kmMark == "")
 	{
 		cout << "Ошбика: Данные отсутствуют!" << endl;
-		f << '-' << endl << '-' << endl;
+
+		f.close();
 		return;
 	}
 
 	if (p.kmMark == "")
 	{
 		cout << "Данные трубы отсутствуют!" << endl;
-		f << '-' << endl;
 	}
 	else
 	{
+		f << 'P' << endl;
 		f << p.kmMark << endl;
 		f << p.length << " ";
 		f << p.diameter << " ";
@@ -311,10 +330,10 @@ void saveObjects(Pipe& p, CS& cs)
 	if (cs.name == "")
 	{
 		cout << "Данные КС отсутствуют!" << endl;
-		f << '-';
 	}
 	else
 	{
+		f << 'C' << endl;
 		f << cs.name << endl;
 		f << cs.guildCount << " ";
 		f << cs.guildCountInWork << " ";
@@ -329,7 +348,12 @@ void saveObjects(Pipe& p, CS& cs)
 
 void loadObjects(Pipe& p, CS& cs)
 {
-	std::ifstream f("data.txt");
+	string fileName;
+
+	cout << "Введите название файла или путь (без расширения): ";
+	std::getline(cin, fileName);
+
+	std::ifstream f(fileName + ".txt");
 
 	if (!f.is_open() || f.peek() == EOF)
 	{
@@ -337,46 +361,55 @@ void loadObjects(Pipe& p, CS& cs)
 		return;
 	}
 
-	if (f.peek() == '-')
-	{
-		cout << "Отсутствуют данные трубы!" << endl;
-		f.get();
-	}
-	else
-	{
-		std::getline(f, p.kmMark);
-		f >> p.length >> p.diameter >> p.isUnderRepair;
+	char type;
 
-		if (f.fail())
+
+	while (f.peek() != EOF)
+	{
+		type = f.get();
+		f.get();
+
+		if (type != 'P' && type != 'C')
 		{
-			cout << "Ошибка: некорректное считывание из файла!" << endl;
+			cout << "Ошибка: некорректное чтение файла!" << endl;
+
+			f.close();
 			return;
 		}
 
-		cout << "Труба загружена!" << endl;
-	}
-
-	f.get();
-
-	if (f.peek() == '-')
-	{
-		cout << "Отсутствуют данные КС!" << endl;
-		f.get();
-	}
-	else
-	{
-		std::getline(f, cs.name);
-		f >> cs.guildCount >> cs.guildCountInWork
-			>> cs.efficiency;
-
-		if (f.fail())
+		if (type == 'P')
 		{
-			cout << "Ошибка: некорректное считывание из файла!" << endl;
-			return;
+			std::getline(f, p.kmMark);
+			f >> p.length >> p.diameter >> p.isUnderRepair;
+
+			if (p.kmMark == "" || f.fail())
+			{
+				cout << "Ошибка: некорректное считывание из файла!" << endl;
+
+				f.close();
+				return;
+			}
+
+			cout << "Труба загружена!" << endl;
+		}
+		else
+		{
+			std::getline(f, cs.name);
+			f >> cs.guildCount >> cs.guildCountInWork
+				>> cs.efficiency;
+
+			if (cs.name == "" || f.fail())
+			{
+				cout << "Ошибка: некорректное считывание из файла!" << endl;
+				return;
+			}
+
+			cout << "КС загружена!" << endl;
 		}
 
-		cout << "КС загружена!" << endl;
+		f.get();
 	}
+	
 
 	f.close();
 }
