@@ -22,10 +22,10 @@ void flush();
 void addPipe(Pipe& p);
 void addCS(CS& cs);
 
-void printObjects(Pipe& p, CS& cs);
+void printObjects(const Pipe& p, const CS& cs);
 
 void redactPipe(Pipe& p);
 void redactCS(CS& cs);
 
-void saveObjects(Pipe& p, CS& cs);
+void saveObjects(const Pipe& p, const CS& cs);
 void loadObjects(Pipe& p, CS& cs);

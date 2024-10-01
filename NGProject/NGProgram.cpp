@@ -1,9 +1,8 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <vector>
 
-#include "functions.h"
+#include "NGProgram.h"
 
 using std::ofstream;
 using std::ifstream;
@@ -12,180 +11,123 @@ using std::cout;
 using std::cin;
 using std::endl;
 
-//ofstream& operator << (ofstream & out, const Pipe & p)
-//{
-//	out << "Километровая отметка (название) трубы: " << p.kmMark << endl;
-//	out << "Длина трубы: " << p.length << endl;
-//	out << "Диаметр трубы: " << p.diameter << endl;
-//	out << "Статус: " << (p.isUnderRepair ? "В ремонте" : "Работает") << endl;
-//
-//	return out;
-//}
+int Pipe::idCount = 0;
+int CS::idCount = 0;
 
-void flush()
+Pipe::Pipe()
 {
-	cin.ignore(10000, '\n');
-}
+	id = idCount;
+	++idCount;
 
-void resetInput()
-{
-	cout << "Введите корректное значение!" << endl << endl;
-
-	cin.clear();
-	flush();	
-}
-
-void addPipe(Pipe& p)
-{
+	cout << "Введите километровую отметку (название): ";
 	while (true)
 	{
-		cout << "Введите километровую отметку (название): ";
-		std::getline(cin, p.kmMark);
+		std::getline(cin, kmMark);
 
-		if (p.kmMark == "")
+		if (kmMark == "null")
 		{
-			cout << "Название обязательно!" << endl << endl;
-			continue;
-		}
-
-		if (cin.fail())
-		{
-			resetInput();
+			cout << "null незя, ты давай еще подумай!" << endl;
 			continue;
 		}
 
 		break;
 	}
-	
 
+	cout << "Введите длину трубы: ";
 	while (true)
 	{
-		cout << "Введите длину трубы: ";
-		cin >> p.length;
+		checkInput(length);
 
-		if (p.length <= 0 || cin.fail())
+		if (length <= 0)
 		{
-			resetInput();
+			cout << "Длина должна быть больше нуля!" << endl;
 			continue;
 		}
 
-		flush();
 		break;
 	}
-	
 
+	cout << "Введите диаметр трубы: ";
 	while (true)
 	{
-		cout << "Введите диаметр трубы: ";
-		cin >> p.diameter;
+		checkInput(diameter);
 
-		if (p.diameter < 1 || cin.fail())
+		if (diameter < 1)
 		{
-			resetInput();
+			cout << "Диаметр не может быть меньше 1!" << endl;
 			continue;
 		}
 
-		flush();
 		break;
 	}
-	
 
-	while (true)
-	{
-		cout << "Труба в ремонте? (1 - да, 0 - нет): ";
-		cin >> p.isUnderRepair;
-
-		if (cin.fail())
-		{
-			resetInput();
-			continue;
-		}
-
-		flush();
-		break;
-	}
+	cout << "Труба в ремонте? (1 - да, 0 - нет): ";
+	checkInput(isUnderRepair);
 
 	cout << endl << "Труба инициализирована!" << endl;
-	
 }
 
-void addCS(CS& cs)
+CS::CS()
 {
+	id = idCount;
+	++idCount;
+
+	cout << "Введите название КС: ";
 	while (true)
 	{
-		cout << "Введите название КС: ";
-		std::getline(cin, cs.name);
+		std::getline(cin, name);
 
-		if (cs.name == "")
+		if (name == "null")
 		{
-			cout << "Название обязательно!" << endl << endl;
-			continue;
-		}
-
-		if (cin.fail())
-		{
-			resetInput();
+			cout << "null незя, ты давай еще подумай!" << endl;
 			continue;
 		}
 
 		break;
 	}
 
-
+	cout << "Введите кол-во цехов: ";
 	while (true)
 	{
-		cout << "Введите кол-во цехов: ";
-		cin >> cs.guildCount;
+		checkInput(guildCount);
 
-		if (cs.guildCount < 1 || cin.fail())
+		if (guildCount < 1)
 		{
-			resetInput();
+			cout << "Кол-во цехов должно быть больше нуля!" << endl;
 			continue;
 		}
 
-		flush();
 		break;
 	}
 
-
+	cout << "Введите кол-во цехов в работе: ";
 	while (true)
 	{
-		cout << "Введите кол-во цехов в работе: ";
-		cin >> cs.guildCountInWork;
+		checkInput(guildCountInWork);
 
-		if (cs.guildCountInWork <= 0 || cs.guildCountInWork > cs.guildCount
-			|| cin.fail())
+		if (guildCountInWork < 0)
 		{
-			resetInput();
+			cout << "Кол-во цехов в работе должно быть положительным!" << endl;
 			continue;
 		}
 
-		flush();
-		break;
-	}
-
-
-	while (true)
-	{
-		cout << "Введите коэффициент эффективности КС: ";
-		cin >> cs.efficiency;
-
-		if (cin.fail())
+		if (guildCountInWork > guildCount)
 		{
-			resetInput();
-			continue;
+			cout << "Кол-во рабочих цехов должно быть меньше общего!" << endl;
 		}
 
-		flush();
 		break;
 	}
+
+	cout << "Введите коэффициент эффективности КС: ";
+	checkInput(efficiency);
 
 	cout << endl << "КС инициализирована!" << endl;
 }
 
-void printObjects(const Pipe& p, const CS& cs)
+void Pipe::printPipe(const Pipe& p)
 {
-	if (p.kmMark == "")
+	if (p.kmMark == "null")
 	{
 		cout << "Данные трубы отсутствуют!" << endl;
 	}
@@ -196,10 +138,13 @@ void printObjects(const Pipe& p, const CS& cs)
 		cout << "Диаметр трубы: " << p.diameter << endl;
 		cout << "Статус: " << (p.isUnderRepair ? "В ремонте" : "Работает") << endl;
 	}
-	
-	cout << endl;
 
-	if (cs.name == "")
+	cout << endl;
+}
+
+void CS::printCS(const CS& cs)
+{
+	if (cs.name == "null")
 	{
 		cout << "Данные КС отсутствуют!" << endl << endl;
 
@@ -209,64 +154,48 @@ void printObjects(const Pipe& p, const CS& cs)
 		cout << "Название КС: " << cs.name << endl;
 		cout << "Кол-во цехов: " << cs.guildCount << endl;
 		cout << "Кол-во цехов в работе: " << cs.guildCountInWork << endl;
-		cout << "Коэффициент эффективности: " << cs.efficiency << endl << endl;
+		cout << "Коэффициент эффективности: " << cs.efficiency << endl;
 	}
-	
-	cout << "Готово!" << endl;
 
+	cout << endl;
 }
 
-void redactPipe(Pipe& p)
+void Pipe::redactPipe(Pipe& p)
 {
-	if (p.kmMark == "")
+	if (p.kmMark == "null")
 	{
 		cout << "Ошибка: Данные трубы отсутствуют!" << endl;
 		return;
 	}
 
 	cout << "Труба в ремонте? (1 - да, 0 - нет): ";
-	cin >> p.isUnderRepair;
-
-	if (cin.fail())
-	{
-		resetInput();
-	}
-
-	flush();	
+	checkInput(p.isUnderRepair);
 
 	cout << "Статус изменен!" << endl;
-
 }
 
-void redactCS(CS& cs)
+void CS::redactCS(CS& cs)
 {
-	if (cs.name == "")
+	if (cs.name == "null")
 	{
 		cout << "Ошбика: Данные КС отсутствуют!" << endl;
 		return;
 	}
 
-	int increase;
+	bool increase;
 
 	cout << "Добавить цех - 1, убрать - 0" << endl;
 
+	cout << "Введите номер: ";
 	while (true)
 	{
-		cout << "Введите номер: ";
-		cin >> increase;
-
-		if (increase < 0 || increase > 1 || cin.fail())
-		{
-			resetInput();
-		}
-
-		flush();
+		checkInput(increase);
 
 		if (increase)
 		{
 			if (cs.guildCount == cs.guildCountInWork)
 			{
-				cout << "Ошибка: Кол-во рабочих цехов превышено!" << endl;
+				cout << "Кол-во рабочих цехов превышено!" << endl;
 				return;
 			}
 
@@ -276,7 +205,7 @@ void redactCS(CS& cs)
 		{
 			if (cs.guildCountInWork == 0)
 			{
-				cout << "Ошибка: Кол-во рабочих цехов равно нулю!" << endl;
+				cout << "Кол-во рабочих цехов равно нулю!" << endl;
 				return;
 			}
 
@@ -285,9 +214,10 @@ void redactCS(CS& cs)
 
 		break;
 	}
-	
+
 	cout << "Готово!" << endl;
 }
+
 
 void saveObjects(const Pipe& p, const CS& cs)
 {
@@ -327,7 +257,7 @@ void saveObjects(const Pipe& p, const CS& cs)
 
 		cout << "Данные трубы сохранены! ";
 	}
-	
+
 	if (cs.name == "")
 	{
 		cout << "Данные КС отсутствуют!" << endl;
@@ -410,7 +340,7 @@ void loadObjects(Pipe& p, CS& cs)
 
 		f.get();
 	}
-	
+
 
 	f.close();
 }

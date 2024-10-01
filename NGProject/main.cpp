@@ -4,12 +4,19 @@
 #include <conio.h>
 #include <vector>
 
-#include "functions.h"
+#include "NGProgram.h"
 
 using std::string;
 using std::cout;
 using std::cin;
 using std::endl;
+
+
+/*
+Несколько объектов (Добавление, удаление, редактирование)
+Фильтры
+убрать/оставить null
+*/
 
 void printHelp()
 {
@@ -25,6 +32,7 @@ void printHelp()
 	cout << "0 - Выход" << endl << endl;
 }
 
+
 int main()
 {
 	setlocale(LC_ALL, "ru");
@@ -36,22 +44,18 @@ int main()
 
 	Pipe p;
 	CS cs;
-	
+
 	while (true)
 	{
 		cout << "Введите нoмер: ";
-		cin >> choice;
+		checkInput(choice);
 
-		if (cin.fail() || choice > 7 || choice < 0)
+		if (choice > 7 || choice < 0)
 		{
 			cout << "Введите корректный номер!" << endl << endl;
-
-			cin.clear();
-			flush();
 			continue;
 		}
 
-		flush();
 		system("cls");
 
 		switch (choice)
