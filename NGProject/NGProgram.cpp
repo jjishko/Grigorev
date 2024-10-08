@@ -14,174 +14,96 @@ using std::endl;
 int Pipe::idCount = 0;
 int CS::idCount = 0;
 
-Pipe::Pipe()
+std::istream& operator>>(std::istream& in, Pipe& p)
 {
-	id = idCount;
-	++idCount;
+	p.id = p.idCount;
+	++p.idCount;
 
 	cout << "Введите километровую отметку (название): ";
-	while (true)
-	{
-		std::getline(cin, kmMark);
-
-		if (kmMark == "null")
-		{
-			cout << "null незя, ты давай еще подумай!" << endl;
-			continue;
-		}
-
-		break;
-	}
+	cin >> std::ws;
+	std::getline(in, p.kmMark);
 
 	cout << "Введите длину трубы: ";
-	while (true)
-	{
-		checkInput(length);
-
-		if (length <= 0)
-		{
-			cout << "Длина должна быть больше нуля!" << endl;
-			continue;
-		}
-
-		break;
-	}
+	checkInput(p.length, float(0), FLT_MAX, in);
 
 	cout << "Введите диаметр трубы: ";
-	while (true)
-	{
-		checkInput(diameter);
-
-		if (diameter < 1)
-		{
-			cout << "Диаметр не может быть меньше 1!" << endl;
-			continue;
-		}
-
-		break;
-	}
+	checkInput(p.diameter, 0, INT_MAX, in);
 
 	cout << "Труба в ремонте? (1 - да, 0 - нет): ";
-	checkInput(isUnderRepair);
+	checkInput(p.isUnderRepair, true, true, in);
 
 	cout << endl << "Труба инициализирована!" << endl;
+
+	return in;
 }
 
-CS::CS()
+std::istream& operator>>(std::istream& in, CS& cs)
 {
-	id = idCount;
-	++idCount;
+	cs.id = cs.idCount;
+	++cs.idCount;
 
 	cout << "Введите название КС: ";
-	while (true)
-	{
-		std::getline(cin, name);
-
-		if (name == "null")
-		{
-			cout << "null незя, ты давай еще подумай!" << endl;
-			continue;
-		}
-
-		break;
-	}
+	cin >> std::ws;
+	std::getline(cin, cs.name);
 
 	cout << "Введите кол-во цехов: ";
-	while (true)
-	{
-		checkInput(guildCount);
-
-		if (guildCount < 1)
-		{
-			cout << "Кол-во цехов должно быть больше нуля!" << endl;
-			continue;
-		}
-
-		break;
-	}
+	checkInput(cs.guildCount, 0, INT_MAX, in);
 
 	cout << "Введите кол-во цехов в работе: ";
-	while (true)
-	{
-		checkInput(guildCountInWork);
-
-		if (guildCountInWork < 0)
-		{
-			cout << "Кол-во цехов в работе должно быть положительным!" << endl;
-			continue;
-		}
-
-		if (guildCountInWork > guildCount)
-		{
-			cout << "Кол-во рабочих цехов должно быть меньше общего!" << endl;
-		}
-
-		break;
-	}
+	checkInput(cs.guildCountInWork, 0, cs.guildCount + 1, in);
 
 	cout << "Введите коэффициент эффективности КС: ";
-	checkInput(efficiency);
+	checkInput(cs.efficiency, float(- 101), float(101), in);
 
 	cout << endl << "КС инициализирована!" << endl;
+
+	return in;
 }
 
-void Pipe::printPipe(const Pipe& p)
+std::ostream& operator<<(std::ostream& out, const Pipe& p)
 {
-	if (p.kmMark == "null")
-	{
-		cout << "Данные трубы отсутствуют!" << endl;
-	}
-	else
-	{
-		cout << "Километровая отметка (название) трубы: " << p.kmMark << endl;
-		cout << "Длина трубы: " << p.length << endl;
-		cout << "Диаметр трубы: " << p.diameter << endl;
-		cout << "Статус: " << (p.isUnderRepair ? "В ремонте" : "Работает") << endl;
-	}
+	out << "ID трубы: " << p.id << endl;
+	out << "Километровая отметка (название) трубы: " << p.kmMark << endl;
+	out << "Длина трубы: " << p.length << endl;
+	out << "Диаметр трубы: " << p.diameter << endl;
+	out << "Статус: " << (p.isUnderRepair ? "В ремонте" : "Работает") << endl;
+	out << endl;
 
-	cout << endl;
+	return out;
 }
 
-void CS::printCS(const CS& cs)
+std::ostream& operator<<(std::ostream& out, const CS& cs)
 {
-	if (cs.name == "null")
-	{
-		cout << "Данные КС отсутствуют!" << endl << endl;
+	out << "ID КС: " << cs.id << endl;
+	out << "Название КС: " << cs.name << endl;
+	out << "Кол-во цехов: " << cs.guildCount << endl;
+	out << "Кол-во цехов в работе: " << cs.guildCountInWork << endl;
+	out << "Коэффициент эффективности: " << cs.efficiency << endl;
+	out << endl;
 
-	}
-	else
-	{
-		cout << "Название КС: " << cs.name << endl;
-		cout << "Кол-во цехов: " << cs.guildCount << endl;
-		cout << "Кол-во цехов в работе: " << cs.guildCountInWork << endl;
-		cout << "Коэффициент эффективности: " << cs.efficiency << endl;
-	}
+	return out;
+}
 
-	cout << endl;
+int Pipe::getID()
+{
+	return this->id;
+}
+
+int CS::getID()
+{
+	return this->id;
 }
 
 void Pipe::redactPipe(Pipe& p)
 {
-	if (p.kmMark == "null")
-	{
-		cout << "Ошибка: Данные трубы отсутствуют!" << endl;
-		return;
-	}
-
 	cout << "Труба в ремонте? (1 - да, 0 - нет): ";
-	checkInput(p.isUnderRepair);
+	checkInput(p.isUnderRepair, true, true, cin);
 
 	cout << "Статус изменен!" << endl;
 }
 
 void CS::redactCS(CS& cs)
 {
-	if (cs.name == "null")
-	{
-		cout << "Ошбика: Данные КС отсутствуют!" << endl;
-		return;
-	}
-
 	bool increase;
 
 	cout << "Добавить цех - 1, убрать - 0" << endl;
@@ -189,7 +111,7 @@ void CS::redactCS(CS& cs)
 	cout << "Введите номер: ";
 	while (true)
 	{
-		checkInput(increase);
+		checkInput(increase, true, true, cin);
 
 		if (increase)
 		{
@@ -218,7 +140,7 @@ void CS::redactCS(CS& cs)
 	cout << "Готово!" << endl;
 }
 
-
+//сохранять id
 void saveObjects(const Pipe& p, const CS& cs)
 {
 	string fileName;
@@ -344,3 +266,39 @@ void loadObjects(Pipe& p, CS& cs)
 
 	f.close();
 }
+
+void addPipe(std::unordered_map<int, Pipe>& map)
+{
+	Pipe p;
+	cin >> p;
+
+	map.insert({ p.getID(), p });
+}
+
+void addCS(std::unordered_map<int, CS>& map)
+{
+	CS cs;
+	cin >> cs;
+
+	map.insert({ cs.getID(), cs });
+}
+
+void printObjects(std::unordered_map<int, Pipe>& mapPipe, std::unordered_map<int, CS>& mapCS)
+{
+	cout << "Трубы:" << endl << endl;
+
+	for(auto& p : mapPipe)
+	{
+		cout << p.second;
+	}
+
+	cout << endl << "КС:" << endl << endl;
+
+	for (auto& cs : mapCS)
+	{
+		cout << cs.second;
+	}
+}
+
+
+
