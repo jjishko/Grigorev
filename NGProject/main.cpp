@@ -1,10 +1,9 @@
 #include <iostream>
 #include <string>
-#include <limits>
-#include <conio.h>
-#include <vector>
 #include <unordered_map>
+#include <chrono>
 
+#include "misc.h"
 #include "NGProgram.h"
 
 using std::string;
@@ -15,9 +14,8 @@ using std::unordered_map;
 
 
 /*
-Несколько объектов (Добавление, удаление, редактирование)
 Фильтры
-Ограничения в checkInput
+Логи (bool, имя файлов (noskipws)?)
 */
 
 void printHelp()
@@ -26,11 +24,11 @@ void printHelp()
 
 	cout << "1 - Добавить трубу" << endl;
 	cout << "2 - Добавить КС" << endl;
-	cout << "3 - Удалить трубу" << endl;
-	cout << "4 - Удалить КС" << endl;
+	cout << "3 - Редактировать трубы" << endl;
+	cout << "4 - Редактировать КС" << endl;
 	cout << "5 - Просмотр всех объектов" << endl;
-	cout << "6 - Редактировать трубу" << endl;
-	cout << "7 - Редактировать КС" << endl;
+	cout << "6 - Удалить трубы" << endl;
+	cout << "7 - Удалить КС" << endl;
 	cout << "8 - Сохранить" << endl;
 	cout << "9 - Загрузить" << endl;
 	cout << "0 - Выход" << endl << endl;
@@ -41,6 +39,13 @@ int main()
 {
 	setlocale(LC_ALL, "ru");
 
+	RedirectOutputWrapper cerrOut(std::cerr);
+	string time = std::format("{:%d_%m_%Y_%H_%M_%OS}", std::chrono::system_clock::now());
+	std::ofstream logfile("logs\\log_" + time + ".txt");
+
+	if (logfile)
+		cerrOut.redirect(logfile);
+
 	cout << "Добро пожаловать в высокотехнологичный НГ-менеджер!" << endl;
 	printHelp();
 
@@ -48,11 +53,12 @@ int main()
 
 	unordered_map<int, Pipe> mapPipe;
 	unordered_map<int, CS> mapCS;
+	std::unordered_set<int> set;
 
 	while (true)
 	{
 		cout << "Введите нoмер: ";
-		checkInput(choice, -1, 10);
+		checkInput(choice, 0, 9);
 
 		system("cls");
 
@@ -67,10 +73,11 @@ int main()
 			break;
 
 		case 3:
-
+			batchRedacting(mapPipe, editPipes);
 			break;
 
 		case 4:
+			batchRedacting(mapCS, editCS);
 			break;
 
 		case 5:
@@ -78,19 +85,19 @@ int main()
 			break;
 
 		case 6:
-			//redactPipe(p);
+			batchRedacting(mapPipe, deletePipes);
 			break;
 
 		case 7:
-			//redactCS(cs);
+			batchRedacting(mapCS, deleteCS);
 			break;
 
 		case 8:
-			//saveObjects(p, cs);
+			saveObjects(mapPipe, mapCS);
 			break;
 
 		case 9:
-			//loadObjects(p, cs);
+			loadObjects(mapPipe, mapCS);
 			break;
 
 		case 0:
@@ -99,7 +106,9 @@ int main()
 		}
 
 		cout << "Нажмите Enter...";
+		cin.get();
 		cin.ignore(10000, '\n');
+		std::cerr << endl;
 		system("cls");
 
 		printHelp();

@@ -289,7 +289,7 @@ void redactCS(CS& cs)
 	cout << "Готово!" << endl;
 }
 
-void saveObjects(const Pipe& p, const CS& cs)
+void saveObject(const Pipe& p, const CS& cs)
 {
 	string fileName;
 
@@ -347,7 +347,7 @@ void saveObjects(const Pipe& p, const CS& cs)
 
 }
 
-void loadObjects(Pipe& p, CS& cs)
+void loadObject(Pipe& p, CS& cs)
 {
 	string fileName;
 

@@ -1,49 +1,14 @@
 #pragma once
 #include <string>
 #include <iostream>
+#include <vector>
 #include <unordered_map>
+#include <unordered_set>
+#include <fstream>
 
-/// <summary>
-/// На вход дается ИНТЕРВАЛ, не отрезок
-/// </summary>
-template <typename T>
-void checkInput(T& var, T left, T right,
-	std::istream& in = std::cin)
-{
-	bool extraLine;
-	bool notInInterval;
-	std::string type;
+#include "misc.h"
 
-	while (true)
-	{
-		in >> var;
-
-		extraLine = (in.peek() != 10);
-		type = typeid(T).name();
-
-		if (type == "bool")
-		{
-			notInInterval = false;
-		}
-		else
-		{
-			notInInterval = (var <= left || var >= right);
-		}
-
-		if (extraLine || notInInterval)
-		{
-			std::cout << "Ошибка: кривые руки!" << std::endl;
-			std::cout << "Попробуйте еще раз: ";
-
-			in.clear();
-			in.ignore(10000, '\n');
-			continue;
-		}
-
-		std::cin.ignore(10000, '\n');
-		break;
-	}
-}
+//std::vector<int> parseString(std::string str);
 
 class CS;
 
@@ -53,14 +18,15 @@ public:
 
 	static int idCount;
 
+	Pipe();
 	int getID();
-	void redactPipe(Pipe& p);
 
-	friend void saveObjects(const Pipe& p, const CS& cs);
-	friend void loadObjects(Pipe& p, CS& cs);
+	friend void editPipe(Pipe& p);
 
 	friend std::istream& operator >> (std::istream& in, Pipe& p);
 	friend std::ostream& operator << (std::ostream& out, const Pipe& p);
+	friend std::ifstream& operator >> (std::ifstream& in, Pipe& p);
+	friend std::ofstream& operator << (std::ofstream& out, const Pipe& p);
 
 private:
 	
@@ -76,14 +42,15 @@ class CS
 public:
 	static int idCount;
 
+	CS();
 	int getID();
-	void redactCS(CS& cs);
 
-	friend void saveObjects(const Pipe& p, const CS& cs);
-	friend void loadObjects(Pipe& p, CS& cs);
+	friend void editCS(CS& cs);
 
 	friend std::istream& operator >> (std::istream& in, CS& cs);
 	friend std::ostream& operator << (std::ostream& out, const CS& cs);
+	friend std::ifstream& operator >> (std::ifstream& in, CS& cs);
+	friend std::ofstream& operator << (std::ofstream& out, const CS& cs);
 
 private:
 
@@ -94,14 +61,115 @@ private:
 	float efficiency;
 };
 
-void saveObjects(const Pipe& p, const CS& cs);
-void loadObjects(Pipe& p, CS& cs);
-
-
 void addPipe(std::unordered_map<int, Pipe>& map);
 void addCS(std::unordered_map<int, CS>& map);
 
-void printObjects(std::unordered_map<int, Pipe>& mapPipe,
+void editPipe(Pipe& p);
+void editCS(CS& cs);
+
+void saveObjects(const std::unordered_map<int, Pipe>& mapPipe,
+	const std::unordered_map<int, CS>& mapCS);
+void loadObjects(std::unordered_map<int, Pipe>& mapPipe,
 	std::unordered_map<int, CS>& mapCS);
+
+void printObjects(const std::unordered_map<int, Pipe>& mapPipe,
+	const std::unordered_map<int, CS>& mapCS);
+
+
+void editPipes(std::unordered_map<int, Pipe>& map, 
+	std::unordered_set<int>& set);
+void editCS(std::unordered_map<int, CS>& map,
+	std::unordered_set<int>& set);
+
+void deletePipes(std::unordered_map<int, Pipe>& map,
+  std::unordered_set<int>& set);
+void deleteCS(std::unordered_map<int, CS>& map,
+  std::unordered_set<int>& set);
+
+//часть->фильтр или по id
+//все 
+template <typename T>
+void batchRedacting(std::unordered_map<int, T>& map, 
+	void edit(std::unordered_map<int, T>& map, std::unordered_set<int>& set))
+{
+	int choice;
+	std::unordered_set<int> set;
+
+	std::cout << "Введите 1, чтобы работать с выбранными объектами, "
+		<< "0, чтобы работать со всеми: ";
+	checkInput(choice, 0, 1);
+	system("cls");
+
+	if (choice)
+	{
+		std::cout << "Введите 1, чтобы выбрать объекты по фильтру, "
+			<< "0, чтобы выбрать по ID: ";
+		checkInput(choice, 0, 1);
+		system("cls");
+
+		if (choice)
+		{
+			for (const auto& [id, el] : map)
+			{
+				//if (/*сравнить по фильтру*/)
+				//{
+				//	set.emplace(id);
+				//}
+			}
+		}
+		else
+		{
+			std::cout << "Все объекты: " << std::endl << std::endl;
+
+			for (const auto& obj : map)
+			{
+				std::cout << obj.second;
+			}
+
+			std::cout << std::endl;
+
+			std::cout << "Вводите ID объектов через пробел (-1: закончить ввод):" 
+				<< std::endl;
+
+			int id;
+
+			while (true)
+			{
+				checkInput(id, -1, INT_MAX);
+
+				if (id == -1)
+				{
+					break;
+				}
+
+				if (!map.contains(id))
+				{
+					std::cout << "Нет объекта с заданным id!" << std::endl;
+					continue;
+				}
+
+				set.emplace(id);
+			}
+		}
+
+		std::cout << std::endl << std::endl;
+	}
+	else
+	{
+		for (const auto& el : map)
+		{
+			set.emplace(el.first);
+		}
+	}
+
+	if (set.empty())
+	{
+		std::cout << "Не найдено ни одного объекта!" << std::endl << std::endl;
+		return;
+	}
+
+	edit(map, set);
+	std::cout << std::endl << "Готово!" << std::endl;
+}
 
 

@@ -77,11 +77,11 @@ int main()
 			break;
 
 		case 6:
-			saveObjects(p, cs);
+			saveObject(p, cs);
 			break;
 
 		case 7:
-			loadObjects(p, cs);
+			loadObject(p, cs);
 			break;
 
 		case 0:
