@@ -20,6 +20,8 @@ public:
 
 	Pipe();
 	int getID();
+	bool getStatus() const;
+	std::string getKmMark() const;
 
 	friend void editPipe(Pipe& p);
 
@@ -44,6 +46,9 @@ public:
 
 	CS();
 	int getID();
+	std::string getName() const;
+	int getGuildCount() const;
+	int getGuildCountInWork() const;
 
 	friend void editCS(CS& cs);
 
@@ -72,7 +77,9 @@ void saveObjects(const std::unordered_map<int, Pipe>& mapPipe,
 void loadObjects(std::unordered_map<int, Pipe>& mapPipe,
 	std::unordered_map<int, CS>& mapCS);
 
-void printObjects(const std::unordered_map<int, Pipe>& mapPipe,
+void printPipes(const std::unordered_map<int, Pipe>& map);
+void printCS(const std::unordered_map<int, CS>& map);
+void printAll(const std::unordered_map<int, Pipe>& mapPipe,
 	const std::unordered_map<int, CS>& mapCS);
 
 
@@ -86,8 +93,32 @@ void deletePipes(std::unordered_map<int, Pipe>& map,
 void deleteCS(std::unordered_map<int, CS>& map,
   std::unordered_set<int>& set);
 
-//часть->фильтр или по id
-//все 
+
+template <typename T1, typename T2>
+using filter = bool(*)(const T1& obj, T2 param);
+
+inline bool filtByName(const Pipe& p, std::string name);
+inline bool filtByRepairingFlag(const Pipe& p, bool type);
+inline bool filtByName(const CS& cs, std::string name);
+inline bool filtByGuildUpperPercentage(const CS& cs, int percent);
+inline bool filtByGuildLowerPercentage(const CS& cs, int percent);
+
+template <typename T1, typename T2>
+void filtObjects(const std::unordered_map<int, T1>& map, 
+	std::unordered_set<int>& set, filter<T1, T2> f, T2 param)
+{
+	for (const auto& [id, obj] : map)
+	{
+		if (f(obj, param))
+		{
+			set.insert(id);
+		}
+	}
+}
+
+std::unordered_set<int> makeSetOfFilteredPipes(const std::unordered_map<int, Pipe>& map);
+std::unordered_set<int> makeSetOfFilteredCS(const std::unordered_map<int, CS>& map);
+
 template <typename T>
 void batchRedacting(std::unordered_map<int, T>& map, 
 	void edit(std::unordered_map<int, T>& map, std::unordered_set<int>& set))
@@ -109,12 +140,13 @@ void batchRedacting(std::unordered_map<int, T>& map,
 
 		if (choice)
 		{
-			for (const auto& [id, el] : map)
+			if constexpr (std::is_same_v<T, Pipe>)
 			{
-				//if (/*сравнить по фильтру*/)
-				//{
-				//	set.emplace(id);
-				//}
+				set = makeSetOfFilteredPipes(map);
+			}
+			else if constexpr (std::is_same_v<T, CS>)
+			{
+				set = makeSetOfFilteredCS(map);
 			}
 		}
 		else

@@ -15,7 +15,6 @@ using std::unordered_map;
 
 /*
 Фильтры
-Логи (bool, имя файлов (noskipws)?)
 */
 
 void printHelp()
@@ -54,7 +53,7 @@ int main()
 	unordered_map<int, Pipe> mapPipe;
 	unordered_map<int, CS> mapCS;
 	std::unordered_set<int> set;
-
+	
 	while (true)
 	{
 		cout << "Введите нoмер: ";
@@ -81,7 +80,7 @@ int main()
 			break;
 
 		case 5:
-			printObjects(mapPipe, mapCS);
+			printAll(mapPipe, mapCS);
 			break;
 
 		case 6:
@@ -106,7 +105,12 @@ int main()
 		}
 
 		cout << "Нажмите Enter...";
-		cin.get();
+ 
+		if (cin.rdbuf()->in_avail())
+		{
+			cin.get();
+		}
+
 		cin.ignore(10000, '\n');
 		std::cerr << endl;
 		system("cls");

@@ -22,7 +22,7 @@ public:
 	}
 };
 
-void inputLine(std::string str, std::istream& in);
+void inputLine(std::string& str, std::istream& in);
 
 template <typename T>
 void checkInput(T& var, T left, T right,
