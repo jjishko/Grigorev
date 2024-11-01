@@ -12,7 +12,6 @@ using std::cin;
 using std::endl;
 using std::unordered_map;
 
-
 /*
 Фильтры
 */
@@ -23,13 +22,11 @@ void printHelp()
 
 	cout << "1 - Добавить трубу" << endl;
 	cout << "2 - Добавить КС" << endl;
-	cout << "3 - Редактировать трубы" << endl;
-	cout << "4 - Редактировать КС" << endl;
+	cout << "3 - Действия с трубами" << endl;
+	cout << "4 - Действия с КС" << endl;
 	cout << "5 - Просмотр всех объектов" << endl;
-	cout << "6 - Удалить трубы" << endl;
-	cout << "7 - Удалить КС" << endl;
-	cout << "8 - Сохранить" << endl;
-	cout << "9 - Загрузить" << endl;
+	cout << "6 - Сохранить" << endl;
+	cout << "7 - Загрузить" << endl;
 	cout << "0 - Выход" << endl << endl;
 }
 
@@ -57,7 +54,7 @@ int main()
 	while (true)
 	{
 		cout << "Введите нoмер: ";
-		checkInput(choice, 0, 9);
+		checkInput(choice, 0, 7);
 
 		system("cls");
 
@@ -72,11 +69,11 @@ int main()
 			break;
 
 		case 3:
-			batchRedacting(mapPipe, editPipes);
+			chooseAction(mapPipe);
 			break;
 
 		case 4:
-			batchRedacting(mapCS, editCS);
+			chooseAction(mapCS);
 			break;
 
 		case 5:
@@ -84,18 +81,10 @@ int main()
 			break;
 
 		case 6:
-			batchRedacting(mapPipe, deletePipes);
-			break;
-
-		case 7:
-			batchRedacting(mapCS, deleteCS);
-			break;
-
-		case 8:
 			saveObjects(mapPipe, mapCS);
 			break;
 
-		case 9:
+		case 7:
 			loadObjects(mapPipe, mapCS);
 			break;
 

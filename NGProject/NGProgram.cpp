@@ -2,9 +2,12 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
 #include "misc.h"
 #include "NGProgram.h"
+#include "Pipe.h"
+#include "CS.h"
 
 using std::ofstream;
 using std::ifstream;
@@ -13,282 +16,15 @@ using std::cout;
 using std::cin;
 using std::endl;
 
-int Pipe::idCount = 0;
-int CS::idCount = 0;
-
-std::istream& operator>>(std::istream& in, Pipe& p)
-{
-	cout << "Введите километровую отметку (название): ";
-	in >> std::ws;
-	inputLine(p.kmMark, in);
-
-	cout << "Введите длину трубы: ";
-	checkInput(p.length, float(0.1), FLT_MAX, in);
-
-	cout << "Введите диаметр трубы: ";
-	checkInput(p.diameter, 1, INT_MAX, in);
-
-	cout << "Труба в ремонте? (1 - да, 0 - нет): ";
-	
-	int isUnderRepair;
-	checkInput(isUnderRepair, 0, 1, in);
-	p.isUnderRepair = bool(isUnderRepair);
-
-	cout << endl << "Труба инициализирована!" << endl;
-
-	return in;
-}
-
-std::istream& operator>>(std::istream& in, CS& cs)
-{
-	cout << "Введите название КС: ";
-	cin >> std::ws;
-	inputLine(cs.name, in);
-
-	cout << "Введите кол-во цехов: ";
-	checkInput(cs.guildCount, 1, INT_MAX, in);
-
-	cout << "Введите кол-во цехов в работе: ";
-	checkInput(cs.guildCountInWork, 0, cs.guildCount, in);
-
-	cout << "Введите коэффициент эффективности КС: ";
-	checkInput(cs.efficiency, float(-100), float(100), in);
-
-	cout << endl << "КС инициализирована!" << endl;
-
-	return in;
-}
-
-std::ostream& operator<<(std::ostream& out, const Pipe& p)
-{
-	out << "ID трубы: " << p.id << endl;
-	out << "Километровая отметка (название) трубы: " << p.kmMark << endl;
-	out << "Длина трубы: " << p.length << endl;
-	out << "Диаметр трубы: " << p.diameter << endl;
-	out << "Статус: " << (p.isUnderRepair ? "В ремонте" : "Работает") << endl;
-	out << endl;
-
-	return out;
-}
-
-std::ostream& operator<<(std::ostream& out, const CS& cs)
-{
-	out << "ID КС: " << cs.id << endl;
-	out << "Название КС: " << cs.name << endl;
-	out << "Кол-во цехов: " << cs.guildCount << endl;
-	out << "Кол-во цехов в работе: " << cs.guildCountInWork << endl;
-	out << "Коэффициент эффективности: " << cs.efficiency << endl;
-	out << endl;
-
-	return out;
-}
-
-std::ifstream& operator>>(std::ifstream& in, Pipe& p)
-{
-	string kmMark;
-	inputLine(kmMark, in);
-
-	float length;
-	int id, diameter;
-	bool isUnderRepair;
-
-	in >> id >> length >> diameter >> isUnderRepair;
-
-	if (kmMark == "" || in.fail() || id < 0)
-	{
-		p.id = -1;
-		return in;
-	}
-
-	p.id = id;
-	p.kmMark = kmMark;
-	p.length = length;
-	p.diameter = diameter;
-	p.isUnderRepair = isUnderRepair;
-
-	return in;
-}
-
-std::ifstream& operator>>(std::ifstream& in, CS& cs)
-{
-	string name;
-	inputLine(name, in);
-
-	int guildCount, guildCountInWork, id;
-	float efficiency;
-
-	in >> id >> guildCount >> guildCountInWork >> efficiency;
-
-	if (name == "" || in.fail() || id < 0
-		|| guildCount < 0 || guildCountInWork < 0 ||
-		guildCount < guildCountInWork)
-	{
-		cs.id = -1;
-		return in;
-	}
-
-	cs.id = id;
-	cs.name = name;
-	cs.guildCount = guildCount;
-	cs.guildCountInWork = guildCountInWork;
-	cs.efficiency = efficiency;
-
-	return in;
-}
-
-std::ofstream& operator<<(std::ofstream& out, const Pipe& p)
-{
-	if (p.kmMark == "")
-	{
-		return out;
-	}
-
-	out << 'P' << endl;
-	out << p.kmMark << endl;
-	out << p.id << " ";
-	out << p.length << " ";
-	out << p.diameter << " ";
-	out << p.isUnderRepair << endl;
-
-	return out;
-}
-
-std::ofstream& operator<<(std::ofstream& out, const CS& cs)
-{
-	if (cs.name == "")
-	{
-		return out;
-	}
-
-	out << 'C' << endl;
-	out << cs.name << endl;
-	out << cs.id << " ";
-	out << cs.guildCount << " ";
-	out << cs.guildCountInWork << " ";
-	out << cs.efficiency << endl;
-
-	return out;
-}
-
-Pipe::Pipe()
-{
-	this->id = this->idCount;
-	++this->idCount;
-}
-
-CS::CS()
-{
-	this->id = this->idCount;
-	++this->idCount;
-}
-
-int Pipe::getID()
-{
-	return id;
-}
-
-bool Pipe::getStatus() const
-{
-	return isUnderRepair;
-}
-
-std::string Pipe::getKmMark() const
-{
-	return kmMark;
-}
-
-
-int CS::getID()
-{
-	return id;
-}
-
-std::string CS::getName() const
-{
-	return name;
-}
-
-int CS::getGuildCount() const
-{
-	return guildCount;
-}
-
-int CS::getGuildCountInWork() const
-{
-	return guildCountInWork;
-}
-
-//std::vector<int> parseString(std::string str)
-//{
-//	int pos = str.find(' ');
-//	std::vector<int> res;
-//
-//	if (str == "")
-//	{
-//		return res;
-//	}
-//
-//	do
-//	{
-//		res.push_back(atoi(str.substr(0, pos).c_str()));
-//
-//		str = str.substr(pos + 1);
-//		pos = str.find(' ');
-//
-//	} while (pos != std::string::npos);
-//
-//	return res;
-//}
-
-void editPipe(Pipe& p)
-{
-	p.isUnderRepair = !p.isUnderRepair;
-
-	cout << "ID трубы: " << p.id << endl;
-	cout << "Текущий статус: "
-		<< (p.isUnderRepair ? "В ремонте" : "Работает") << endl;
-}
-
-void editCS(CS& cs)
-{
-	int increase;
-
-	cout << "ID КС: " << cs.id << endl;
-	cout << "Кол-во цехов: " << cs.guildCount << endl;
-	cout << "Кол-во цехов в работе: " << cs.guildCountInWork << endl;
-	cout << "Добавить цех - 1, убрать - 0" << endl;
-
-	cout << "Введите номер: ";
-	checkInput(increase, 0, 1);
-
-	if (increase)
-	{
-		if (cs.guildCount == cs.guildCountInWork)
-		{
-			cout << "Кол-во рабочих цехов превышено!" << endl << endl;
-			return;
-		}
-
-		++cs.guildCountInWork;
-	}
-	else
-	{
-		if (cs.guildCountInWork == 0)
-		{
-			cout << "Кол-во рабочих цехов равно нулю!" << endl << endl;
-			return;
-		}
-
-		--cs.guildCountInWork;
-	}
-
-	cout << "Текущее кол-во рабочих цехов: " << cs.guildCountInWork
-		<< endl << endl;
-}
-
 void saveObjects(const std::unordered_map<int, Pipe>& mapPipe,
 	const std::unordered_map<int, CS>& mapCS)
 {
+	if (mapPipe.empty() && mapCS.empty())
+	{
+		cout << "Нет данных для сохранения!" << endl;
+		return;
+	}
+
 	string fileName;
 
 	cout << "Введите название файла или путь (без расширения и пробелов): ";
@@ -476,7 +212,7 @@ void printAll(const std::unordered_map<int, Pipe>& mapPipe,
 	printCS(mapCS);
 }
 
-void editPipes(std::unordered_map<int, Pipe>& map, std::unordered_set<int>& set)
+void editObjects(std::unordered_map<int, Pipe>& map, std::unordered_set<int>& set)
 {
 	for (auto& id : set)
 	{
@@ -484,7 +220,7 @@ void editPipes(std::unordered_map<int, Pipe>& map, std::unordered_set<int>& set)
 	}
 }
 
-void editCS(std::unordered_map<int, CS>& map, std::unordered_set<int>& set)
+void editObjects(std::unordered_map<int, CS>& map, std::unordered_set<int>& set)
 {
 	for (auto& id : set)
 	{
@@ -492,7 +228,7 @@ void editCS(std::unordered_map<int, CS>& map, std::unordered_set<int>& set)
 	}
 }
 
-void deletePipes(std::unordered_map<int, Pipe>& map, std::unordered_set<int>& set)
+void deleteObjects(std::unordered_map<int, Pipe>& map, std::unordered_set<int>& set)
 {
 	for (auto& id : set)
 	{
@@ -503,7 +239,7 @@ void deletePipes(std::unordered_map<int, Pipe>& map, std::unordered_set<int>& se
 	cout << endl;
 }
 
-void deleteCS(std::unordered_map<int, CS>& map, std::unordered_set<int>& set)
+void deleteObjects(std::unordered_map<int, CS>& map, std::unordered_set<int>& set)
 {
 	for (auto& id : set)
 	{
@@ -512,84 +248,91 @@ void deleteCS(std::unordered_map<int, CS>& map, std::unordered_set<int>& set)
 	}
 }
 
-inline bool filtByName(const Pipe& p, std::string name)
-{
-	return p.getKmMark().find(name) != string::npos;
-}
-inline bool filtByRepairingFlag(const Pipe& p, bool type)
-{
-	return p.getStatus() == type;
-}
-inline bool filtByName(const CS& cs, std::string name)
-{
-	return cs.getName().find(name) != string::npos;
-}
-inline bool filtByGuildUpperPercentage(const CS& cs, int percent)
-{
-	return float(cs.getGuildCount() - cs.getGuildCountInWork())
-		/cs.getGuildCount() * 100 > percent;
-}
-inline bool filtByGuildLowerPercentage(const CS& cs, int percent)
-{
-	return float(cs.getGuildCount() - cs.getGuildCountInWork())
-		/ cs.getGuildCount() * 100 < percent;
-}
 
+std::unordered_set<int> filterIntersection(std::unordered_set<int>& oldSet,
+	std::unordered_set<int>& newSet)
+{
+	std::unordered_set<int> set;
+
+	if (oldSet.empty())
+	{
+		set = newSet;
+	}
+	else
+	{
+		std::set_intersection(oldSet.begin(), oldSet.end(), newSet.begin(), newSet.end(),
+			std::inserter(set, set.begin()));
+	}
+
+	if (set.empty())
+	{
+		std::cout << "Не найдено объектов, подходящих по фильтру!"
+			<< std::endl << std::endl;
+	}
+	else
+	{
+		std::cout << "ID найденных элементов: ";
+
+		for (int id : set)
+		{
+			std::cout << id << " ";
+		}
+
+		std::cout << std::endl << std::endl;
+	}
+
+	oldSet.clear();
+	newSet.clear();
+
+	return set;
+}
 
 std::unordered_set<int> makeSetOfFilteredPipes(const std::unordered_map<int, Pipe>& map)
 {
 	int filtType;
-	std::unordered_set<int> set;
+	std::unordered_set<int> set, oldSet, newSet;
 
 	std::string name;
 	int status;
 
 	printPipes(map);
 
-	std::cout << std::endl;
-	std::cout << "Перечень фильтров (введите -1, чтобы закончить): " << std::endl;
-	std::cout << "0 - фильтр по названию, 1 - по признаку \"в ремонте\"" << std::endl;
+	cout << endl;
+	cout << "Перечень фильтров: " << endl;
+	cout << "1 - фильтр по названию" << endl 
+		<< "2 - по признаку \"в ремонте\"" << endl << endl;
 
 	while (true)
 	{
-		std::cout << "Введите номер: ";
+		cout << "Введите номер фильтра (0, если хотите закончить фильтрацию): ";
+
 		checkInput(filtType, -1, 1);
 
-		if (filtType == -1)
+		if (!filtType)
+		{
+			cout << endl;
 			break;
-
-		if (filtType == 0)
-		{
-			std::cout << "Введите строку для фильтра: ";
-			std::cin >> std::ws;
-			inputLine(name, std::cin);
-
-			filtObjects(map, set, filtByName, name);
 		}
-		else if (filtType == 1)
+
+		if (filtType == 1)
 		{
-			std::cout << "Введите статус (1 - статус \"в ремонте\", 0 - статус \"работает\"): ";
+			cout << "Введите строку для фильтра: ";
+			cin >> std::ws;
+			inputLine(name, cin);
+
+			filtObjects(map, newSet, filtByName, name);
+		}
+		else if (filtType == 2)
+		{
+			cout << "Введите статус (0 - статус \"в ремонте\", 1 - статус \"работает\"): ";
 			checkInput(status, 0, 1);
 
-			filtObjects(map, set, filtByRepairingFlag, bool(status));
+			filtObjects(map, newSet, filtByRepairingFlag, !bool(status));
 		}
 
-		if (set.empty())
-		{
-			std::cout << "Не найдено труб, подходящих по фильтру!"
-				<< std::endl << std::endl;
-		}
-		else
-		{
-			std::cout << "ID найденных элементов: ";
-
-			for (int id : set)
-			{
-				std::cout << id << " ";
-			}
-
-			std::cout << std::endl << std::endl;
-		}
+		oldSet.insert(set.begin(), set.end());
+		set.clear();
+		set = filterIntersection(oldSet, newSet);
 	}
 
 	return set;
@@ -598,63 +341,64 @@ std::unordered_set<int> makeSetOfFilteredPipes(const std::unordered_map<int, Pip
 std::unordered_set<int> makeSetOfFilteredCS(const std::unordered_map<int, CS>& map)
 {
 	int filtType;
-	std::unordered_set<int> set;
+	std::unordered_set<int> set, oldSet, newSet;
 
 	std::string name;
 	int percent;
-	int upperThanPercent;
+	int comparePercent;
 
 	printCS(map);
 
-	std::cout << std::endl;
-	std::cout << "Перечень фильтров (введите -1, чтобы закончить): " << std::endl;
-	std::cout << "0 - фильтр по названию, 1 - по проценту незайдействованных цехов" << std::endl;
+	cout << endl;
+	cout << "Перечень фильтров: " << endl;
+	cout << "1 - фильтр по названию" << endl
+		<< "2 - по проценту незайдействованных цехов" << endl << endl;
 
 	while (true)
 	{
-		std::cout << "Введите номер: ";
-		checkInput(filtType, -1, 1);
+		cout << "Введите номер фильтра (0, если хотите закончить фильтрацию): ";
+		checkInput(filtType, 0, 2);
 
-		if (filtType == -1)
+		if (!filtType)
+		{
+			cout << endl;
 			break;
-
-		if (filtType == 0)
-		{
-			std::cout << "Введите строку для фильтра: ";
-			std::cin >> std::ws;
-			inputLine(name, std::cin);
-
-			filtObjects(map, set, filtByName, name);
 		}
-		else if (filtType == 1)
+
+		if (filtType == 1)
 		{
-			std::cout << "Введите процент незадействованных цехов: ";
+			cout << "Введите строку для фильтра: ";
+			cin >> std::ws;
+			inputLine(name, cin);
+
+			filtObjects(map, newSet, filtByName, name);
+		}
+		else if (filtType == 2)
+		{
+			cout << "Введите процент незадействованных цехов: ";
 			checkInput(percent, 0, 100);
 
-			std::cout << "Введите 1, чтобы найти КС с процентом, больше введенного, "
-				<< "0 - чтобы найти меньше: ";
-			checkInput(upperThanPercent, 0, 1);
+			cout << "Введите 1, чтобы найти КС с процентом, больше введенного, "
+				<< "2 - меньше введенного, 3 - равным введенному: ";
+			checkInput(comparePercent, 1, 3);
 
-			upperThanPercent ? filtObjects(map, set, filtByGuildUpperPercentage, percent)
-				: filtObjects(map, set, filtByGuildLowerPercentage, percent);
-		}
-
-		if (set.empty())
-		{
-			std::cout << "Не найдено КС, подходящих по фильтру!"
-				<< std::endl << std::endl;
-		}
-		else
-		{
-			std::cout << "ID найденных элементов: ";
-
-			for (int id : set)
+			if (comparePercent == 1)
 			{
-				std::cout << id << " ";
+				filtObjects(map, newSet, filtByGuildUpperPercent, percent);
 			}
-
-			std::cout << std::endl << std::endl;
+			else if (comparePercent == 2)
+			{
+				filtObjects(map, newSet, filtByGuildLowerPercent, percent);
+			}
+			else if (comparePercent == 3)
+			{
+				filtObjects(map, newSet, filtByGuildEqualPercent, percent);
+			}
 		}
+
+		oldSet.insert(set.begin(), set.end());
+		set.clear();
+		set = filterIntersection(oldSet, newSet);
 	}
 
 	return set;
