@@ -16,8 +16,37 @@ using std::cout;
 using std::cin;
 using std::endl;
 
+std::ifstream& operator>>(std::ifstream& in, Connection& c)
+{
+	int inputCSId, outputCSId, pipeId;
+
+	in >> inputCSId >> outputCSId >> pipeId;
+
+	if (in.fail())
+	{
+		c.pipeId = 0;
+		return in;
+	}
+
+	c.csInputId = inputCSId;
+	c.csOutputId = outputCSId;
+	c.pipeId = pipeId;
+
+	return in;
+}
+
+std::ofstream& operator<<(std::ofstream& out, const Connection& c)
+{
+	out << 'G' << endl;
+	out << c.csInputId << " ";
+	out << c.csOutputId << " ";
+	out << c.pipeId << endl;
+
+	return out;
+}
+
 void saveObjects(const std::unordered_map<int, Pipe>& mapPipe,
-	const std::unordered_map<int, CS>& mapCS)
+	const std::unordered_map<int, CS>& mapCS, const std::vector<Connection>& arrCon)
 {
 	if (mapPipe.empty() && mapCS.empty())
 	{
@@ -50,13 +79,18 @@ void saveObjects(const std::unordered_map<int, Pipe>& mapPipe,
 		f << cs.second;
 	}
 
+	for (const auto& c : arrCon)
+	{
+		f << c;
+	}
+
 	f.close();
 
 	cout << "Готово!" << endl;
 }
 
 void loadObjects(std::unordered_map<int, Pipe>& mapPipe,
-	std::unordered_map<int, CS>& mapCS)
+	std::unordered_map<int, CS>& mapCS, std::vector<Connection>& arrCon)
 {
 	string fileName;
 
@@ -81,9 +115,11 @@ void loadObjects(std::unordered_map<int, Pipe>& mapPipe,
 
 	std::unordered_map<int, Pipe> newMapPipe;
 	std::unordered_map<int, CS> newMapCS;
+	std::vector<Connection> newArrCon;
 
 	Pipe tmpPipe;
 	CS tmpCS;
+	Connection tmpConnection;
 	char type;
 
 	while (f.peek() != EOF)
@@ -91,7 +127,7 @@ void loadObjects(std::unordered_map<int, Pipe>& mapPipe,
 		type = f.get();
 		f.get();
 
-		if (type != 'P' && type != 'C')
+		if (type != 'P' && type != 'C' && type != 'G')
 		{
 			cout << "Ошибка: некорректное чтение файла!" << endl;
 
@@ -120,7 +156,7 @@ void loadObjects(std::unordered_map<int, Pipe>& mapPipe,
 			Pipe::idCount = std::max(Pipe::idCount, tmpPipe.getID() + 1);
 			newMapPipe.emplace(tmpPipe.getID(), tmpPipe);
 		}
-		else
+		else if (type == 'C')
 		{
 			f >> tmpCS;
 
@@ -138,18 +174,207 @@ void loadObjects(std::unordered_map<int, Pipe>& mapPipe,
 			CS::idCount = std::max(CS::idCount, tmpCS.getID() + 1);
 			newMapCS.emplace(tmpCS.getID(), tmpCS);
 		}
+		else
+		{
+			f >> tmpConnection;
+
+			if (tmpConnection.pipeId  == -1)
+			{
+				cout << "Ошибка: некорректное чтение файла!" << endl;
+
+				Pipe::idCount = maxPipeId;
+				CS::idCount = maxCSId;
+
+				f.close();
+				return;
+			}
+
+			newArrCon.push_back(tmpConnection);
+		}
 
 		f.get();
 	}
 
 	mapPipe = newMapPipe;
 	mapCS = newMapCS;
+	arrCon = newArrCon;
 
 	f.close();
 
 	cout << "Готово!" << endl;
 }
 
+void addConnection(std::vector<Connection>& arrCon, std::unordered_map<int, Pipe>& mapP,
+	std::unordered_map<int, CS>& mapCS)
+{
+	if (mapCS.empty() || mapCS.size() < 2)
+	{
+		cout << "Нельзя создать соединение: недостаточно КС!" << endl;
+		return;
+	}
+
+	Connection newC;
+	int inputId, outputId, diameter;
+
+	printCS(mapCS);
+	cout << "Введите последовательно через Enter "
+		<< "ID КС входа и ID КС выхода:" << endl;
+
+	while (true)
+	{
+		checkInput(inputId, 0, INT_MAX);
+		
+		if (!mapCS.contains(inputId))
+		{
+			std::cout << "Нет КС с заданным id!" << std::endl
+				<< "Попробуйте еще раз: ";
+			continue;
+		}
+
+		break;
+	}
+
+	while (true)
+	{
+		checkInput(outputId, 0, INT_MAX);
+
+		if (!mapCS.contains(outputId) || (outputId == inputId))
+		{
+			cout << "Неверный ввод!" << endl
+				<< "Попробуйте еще раз: ";
+			continue;
+		}
+
+		break;
+	}
+
+	newC.csInputId = inputId;
+	newC.csOutputId = outputId;
+
+	mapCS.at(inputId).isInConnection = true;
+	mapCS.at(outputId).isInConnection = true;
+
+	cout << "Выберите диаметр трубы: " << endl;
+	cout << "1) 500 мм" << endl << "2) 700 мм" << endl
+		<< "3) 1000 мм" << endl << "4) 1400 мм" << endl;
+	checkInput(diameter, 1, 4);
+	diameter = pipeDiameters.at(diameter - 1);
+
+	newC.pipeId = -1;
+
+	for (const auto& [id, p] : mapP)
+	{
+		if (filtByDiameter(p, diameter))
+		{
+			if (p.getStatus() || p.isInConnection)
+			{
+				continue;
+			}
+
+			newC.pipeId = id;
+			break;		
+		}
+	}
+
+	if (newC.pipeId == -1)
+	{
+		Pipe p;
+		createPipeWithGivenDiameter(p, diameter);
+		mapP.emplace(p.getID(), p);
+		newC.pipeId = p.getID();
+	}
+
+	arrCon.push_back(newC);
+	mapP.at(newC.pipeId).isInConnection = true;
+
+	cout << "Готово!" << endl;
+}
+
+void printConnection(const Connection& c,
+	const std::unordered_map<int, Pipe>& mapP)
+{
+	std::cout << c.csInputId << " -> "
+		<< mapP.find(c.pipeId)->second.getDiameter()
+		<< " mm -> " << c.csOutputId << endl;
+}
+
+void printConnection(const std::vector<Connection> arrCon,
+	const std::unordered_map<int, Pipe>& mapP)
+{
+	if (arrCon.empty())
+	{
+		cout << "Соединения отсутствуют!" << endl;
+		return;
+	}
+
+	cout << "Газопровод будет показан в формате (i -> d mm -> o), "
+		<< "где i/o - ID КС входа/выхода, d - диаметр трубы между ними:"
+		<< endl << endl;
+
+	for (int i = 0; i < arrCon.size(); ++i)
+	{
+		cout << i + 1 << ") ";
+		printConnection(arrCon.at(i), mapP);
+	}
+
+	cout << endl;
+}
+
+void deleteConnection(std::vector<Connection>& arrCon, std::unordered_map<int, Pipe>& mapP,
+	std::unordered_map<int, CS>& mapCS)
+{
+	if (arrCon.empty())
+	{
+		cout << "Соединения отсутствуют!" << endl;
+		return;
+	}
+
+	printConnection(arrCon, mapP);
+
+	cout << "Вводите номер соединения, которое хотите удалить: ";
+
+	int indToDelete;
+	checkInput(indToDelete, 1, int(arrCon.size()));
+	--indToDelete;
+	
+	mapP.at(arrCon.at(indToDelete).pipeId).isInConnection = false;
+
+	bool inputCSHaveConnections = false;
+	bool outputCSHaveConnections = false;
+
+	for (int i = 0; i < arrCon.size(); ++i)
+	{
+		if ((arrCon.at(i).csInputId == arrCon.at(indToDelete).csInputId ||
+			arrCon.at(i).csOutputId == arrCon.at(indToDelete).csInputId) && i != indToDelete)
+		{
+			inputCSHaveConnections = true;
+		}
+
+		if ((arrCon.at(i).csInputId == arrCon.at(indToDelete).csOutputId ||
+			arrCon.at(i).csOutputId == arrCon.at(indToDelete).csOutputId) && i != indToDelete)
+		{
+			outputCSHaveConnections = true;
+		}
+
+		if (inputCSHaveConnections && outputCSHaveConnections)
+			break;
+	}
+
+	if (!inputCSHaveConnections)
+	{
+		mapCS.at(arrCon.at(indToDelete).csInputId).isInConnection = false;
+	}
+
+	if (!outputCSHaveConnections)
+	{
+		mapCS.at(arrCon.at(indToDelete).csOutputId).isInConnection = false;
+
+	}
+
+	arrCon.erase(arrCon.begin() + indToDelete);
+
+	cout << "Готово!" << endl;
+}
 
 void addPipe(std::unordered_map<int, Pipe>& map)
 {
@@ -232,6 +457,21 @@ void deleteObjects(std::unordered_map<int, Pipe>& map, std::unordered_set<int>& 
 {
 	for (auto& id : set)
 	{
+		/*if (std::find(Connection::pipesInConnection.begin(),
+			Connection::pipesInConnection.end(), id) == Connection::pipesInConnection.end())
+		{
+			cout << "Труба " << id << " находится в газопроводе!"
+				<< " Сначала удалите соединение!" << endl;
+			continue;
+		}*/
+
+		if (map.at(id).isInConnection)
+		{
+			cout << "Труба " << id << " находится в газопроводе!"
+				<< " Сначала удалите соединение!" << endl;
+			continue;
+		}
+
 		map.erase(id);
 		cout << "Труба " << id << " удалена" << endl;
 	}
@@ -243,11 +483,19 @@ void deleteObjects(std::unordered_map<int, CS>& map, std::unordered_set<int>& se
 {
 	for (auto& id : set)
 	{
+		if (map.at(id).isInConnection)
+		{
+			cout << "КС " << id << " находится в газопроводе!"
+				<< " Сначала удалите соединения!" << endl;
+			continue;
+		}
+
 		map.erase(id);
 		cout << "КС " << id << " удалена" << endl;
 	}
-}
 
+	cout << endl;
+}
 
 std::unordered_set<int> filterIntersection(std::unordered_set<int>& oldSet,
 	std::unordered_set<int>& newSet)
@@ -306,7 +554,7 @@ std::unordered_set<int> makeSetOfFilteredPipes(const std::unordered_map<int, Pip
 	{
 		cout << "Введите номер фильтра (0, если хотите закончить фильтрацию): ";
 
-		checkInput(filtType, -1, 1);
+		checkInput(filtType, 0, 2);
 
 		if (!filtType)
 		{

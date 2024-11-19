@@ -9,6 +9,7 @@ class CS
 {
 public:
 	static int idCount;
+	bool isInConnection = false;
 
 	int getID();
 

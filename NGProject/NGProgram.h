@@ -11,13 +11,35 @@
 #include "Pipe.h"
 #include "CS.h"
 
+struct Connection
+{
+	int csInputId;
+	int csOutputId;
+	int pipeId;
+	//static std::vector<int> pipesInConnection;
+};
+
+std::ifstream& operator >> (std::ifstream& in, Connection& c);
+std::ofstream& operator << (std::ofstream& out, const Connection& c);
+
+void addConnection(std::vector<Connection>& arrCon, std::unordered_map<int, Pipe>& mapP,
+	std::unordered_map<int, CS>& mapCS);
+
+void printConnection(const Connection& c,
+	const std::unordered_map<int, Pipe>& mapP);
+void printConnection(const std::vector<Connection> arrCon,
+	const std::unordered_map<int, Pipe>& mapP);
+
+void deleteConnection(std::vector<Connection>& arrCon, std::unordered_map<int, Pipe>& mapP,
+	std::unordered_map<int, CS>& mapCS);
+
 void addPipe(std::unordered_map<int, Pipe>& map);
 void addCS(std::unordered_map<int, CS>& map);
 
 void saveObjects(const std::unordered_map<int, Pipe>& mapPipe,
-	const std::unordered_map<int, CS>& mapCS);
+	const std::unordered_map<int, CS>& mapCS, const std::vector<Connection>& arrCon);
 void loadObjects(std::unordered_map<int, Pipe>& mapPipe,
-	std::unordered_map<int, CS>& mapCS);
+	std::unordered_map<int, CS>& mapCS, std::vector<Connection>& arrCon);
 
 void printPipes(const std::unordered_map<int, Pipe>& map);
 void printCS(const std::unordered_map<int, CS>& map);

@@ -2,6 +2,7 @@
 #include <string>
 #include <unordered_map>
 #include <chrono>
+#include <vector>
 
 #include "misc.h"
 #include "NGProgram.h"
@@ -13,7 +14,13 @@ using std::endl;
 using std::unordered_map;
 
 /*
-Фильтры
++ Функции для соединения (создать, вывести, удалить) 
++- Не удалять трубу и кс в газопроводе
++- Изменение статуса трубы
++ Сохранение/загрузка соединения
+- Топологическая сортировка
+
+придумать что то с логированием
 */
 
 void printHelp()
@@ -21,12 +28,20 @@ void printHelp()
 	cout << "Инструкции: " << endl;
 
 	cout << "1 - Добавить трубу" << endl;
-	cout << "2 - Добавить КС" << endl;
+	cout << "2 - Добавить КС" << endl << endl;
+
 	cout << "3 - Действия с трубами" << endl;
-	cout << "4 - Действия с КС" << endl;
-	cout << "5 - Просмотр всех объектов" << endl;
-	cout << "6 - Сохранить" << endl;
-	cout << "7 - Загрузить" << endl;
+	cout << "4 - Действия с КС" << endl << endl;
+
+	cout << "5 - Просмотр всех труб и КС" << endl << endl;
+
+	cout << "6 - Создать соединение (добавить в газопровод)" << endl;
+	cout << "7 - Показать весь газопровод" << endl;
+	cout << "8 - Удалить соединение" << endl << endl;
+	//ts
+	cout << "10 - Сохранить" << endl;
+	cout << "11 - Загрузить" << endl << endl;
+
 	cout << "0 - Выход" << endl << endl;
 }
 
@@ -47,14 +62,14 @@ int main()
 
 	int choice;
 
-	unordered_map<int, Pipe> mapPipe;
 	unordered_map<int, CS> mapCS;
-	std::unordered_set<int> set;
+	unordered_map<int, Pipe> mapPipe;
+	std::vector<Connection> arrConnection;
 	
 	while (true)
 	{
 		cout << "Введите нoмер: ";
-		checkInput(choice, 0, 7);
+		checkInput(choice, 0, 11);
 
 		system("cls");
 
@@ -81,11 +96,23 @@ int main()
 			break;
 
 		case 6:
-			saveObjects(mapPipe, mapCS);
+			addConnection(arrConnection, mapPipe, mapCS);
+			break;
+		
+		case 7:
+			printConnection(arrConnection, mapPipe);
 			break;
 
-		case 7:
-			loadObjects(mapPipe, mapCS);
+		case 8:
+			deleteConnection(arrConnection, mapPipe, mapCS);
+			break;
+
+		case 10:
+			saveObjects(mapPipe, mapCS, arrConnection);
+			break;
+
+		case 11:
+			loadObjects(mapPipe, mapCS, arrConnection);
 			break;
 
 		case 0:

@@ -28,8 +28,12 @@ std::istream& operator>>(std::istream& in, Pipe& p)
 	cout << "Введите длину трубы: ";
 	checkInput(p.length, float(0.1), FLT_MAX, in);
 
-	cout << "Введите диаметр трубы: ";
-	checkInput(p.diameter, 1, INT_MAX, in);
+	int diameterInd;
+	cout << "Выберите диаметр трубы: " << endl;
+	cout << "1) 500 мм" << endl << "2) 700 мм" << endl
+		<< "3) 1000 мм" << endl << "4) 1400 мм" << endl;
+	checkInput(diameterInd, 1, 4, in);
+	p.diameter = pipeDiameters.at(diameterInd - 1);
 
 	cout << "Труба в ремонте? (1 - да, 0 - нет): ";
 
@@ -57,14 +61,14 @@ std::ostream& operator<<(std::ostream& out, const Pipe& p)
 std::ifstream& operator>>(std::ifstream& in, Pipe& p)
 {
 	string kmMark;
-	std::cin >> std::ws;
+	in >> std::ws;
 	std::getline(in, kmMark);
 
 	float length;
 	int id, diameter;
-	bool isUnderRepair;
+	bool isUnderRepair, isInConnection;
 
-	in >> id >> length >> diameter >> isUnderRepair;
+	in >> id >> length >> diameter >> isUnderRepair >> isInConnection;
 
 	if (kmMark == "" || in.fail() || id < 0)
 	{
@@ -77,6 +81,7 @@ std::ifstream& operator>>(std::ifstream& in, Pipe& p)
 	p.length = length;
 	p.diameter = diameter;
 	p.isUnderRepair = isUnderRepair;
+	p.isInConnection = isInConnection;
 
 	return in;
 }
@@ -93,18 +98,47 @@ std::ofstream& operator<<(std::ofstream& out, const Pipe& p)
 	out << p.id << " ";
 	out << p.length << " ";
 	out << p.diameter << " ";
-	out << p.isUnderRepair << endl;
+	out << p.isUnderRepair << " ";
+	out << p.isInConnection << endl;
 
 	return out;
 }
 
 int Pipe::getID()
 {
-	return id;
+	return this->id;
+}
+
+int Pipe::getDiameter() const
+{
+	return this->diameter;
+}
+
+int Pipe::getStatus() const 
+{
+	return this->isUnderRepair;
+}
+
+void createPipeWithGivenDiameter(Pipe& p, int diameter)
+{
+	p.id = Pipe::idCount;
+	++Pipe::idCount;
+
+	p.kmMark = "New Pipe " + std::to_string(p.id);
+	p.length = 500;
+	p.diameter = diameter;
+	p.isUnderRepair = false;
 }
 
 void editPipe(Pipe& p)
 {
+	if (p.isInConnection)
+	{
+		cout << "Труба " << p.id << " находится в газопрооводе!"
+			<< " Сначала удалите соединение!" << endl;
+		return;
+	}
+
 	p.isUnderRepair = !p.isUnderRepair;
 
 	cout << "ID трубы: " << p.id << endl;
@@ -119,4 +153,8 @@ bool filtByName(const Pipe& p, std::string name)
 bool filtByRepairingFlag(const Pipe& p, bool type)
 {
 	return p.isUnderRepair == type;
+}
+bool filtByDiameter(const Pipe& p, int d)
+{
+	return p.diameter == d;
 }

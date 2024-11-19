@@ -140,9 +140,6 @@
     <ClCompile Include="NGProgram.cpp" />
     <ClCompile Include="Pipe.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="balls.txt" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

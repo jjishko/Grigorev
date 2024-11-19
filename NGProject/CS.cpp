@@ -54,13 +54,14 @@ std::ostream& operator<<(std::ostream& out, const CS& cs)
 std::ifstream& operator>>(std::ifstream& in, CS& cs)
 {
 	string name;
-	std::cin >> std::ws;
+	in >> std::ws;
 	std::getline(in, name);
 
 	int guildCount, guildCountInWork, id;
 	float efficiency;
+	bool isInConnection;
 
-	in >> id >> guildCount >> guildCountInWork >> efficiency;
+	in >> id >> guildCount >> guildCountInWork >> efficiency >> isInConnection;
 
 	if (name == "" || in.fail() || id < 0
 		|| guildCount < 0 || guildCountInWork < 0 ||
@@ -75,6 +76,7 @@ std::ifstream& operator>>(std::ifstream& in, CS& cs)
 	cs.guildCount = guildCount;
 	cs.guildCountInWork = guildCountInWork;
 	cs.efficiency = efficiency;
+	cs.isInConnection = isInConnection;
 
 	return in;
 }
@@ -91,7 +93,8 @@ std::ofstream& operator<<(std::ofstream& out, const CS& cs)
 	out << cs.id << " ";
 	out << cs.guildCount << " ";
 	out << cs.guildCountInWork << " ";
-	out << cs.efficiency << endl;
+	out << cs.efficiency << " ";
+	out << cs.isInConnection << endl;
 
 	return out;
 }
