@@ -18,9 +18,7 @@ using std::unordered_map;
 +- Не удалять трубу и кс в газопроводе
 +- Изменение статуса трубы
 + Сохранение/загрузка соединения
-- Топологическая сортировка
-
-придумать что то с логированием
++ Топологическая сортировка
 */
 
 void printHelp()
@@ -37,8 +35,9 @@ void printHelp()
 
 	cout << "6 - Создать соединение (добавить в газопровод)" << endl;
 	cout << "7 - Показать весь газопровод" << endl;
-	cout << "8 - Удалить соединение" << endl << endl;
-	//ts
+	cout << "8 - Удалить соединение" << endl;
+	cout << "9 - Топологическая сортировка" << endl << endl;
+
 	cout << "10 - Сохранить" << endl;
 	cout << "11 - Загрузить" << endl << endl;
 
@@ -107,6 +106,10 @@ int main()
 			deleteConnection(arrConnection, mapPipe, mapCS);
 			break;
 
+		case 9:
+			topologicalSort(arrConnection);
+			break;
+
 		case 10:
 			saveObjects(mapPipe, mapCS, arrConnection);
 			break;
@@ -121,11 +124,6 @@ int main()
 		}
 
 		cout << "Нажмите Enter...";
- 
-		if (cin.rdbuf()->in_avail())
-		{
-			cin.get();
-		}
 
 		cin.ignore(10000, '\n');
 		std::cerr << endl;

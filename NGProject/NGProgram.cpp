@@ -3,6 +3,8 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <numeric>
+#include <queue>
 
 #include "misc.h"
 #include "NGProgram.h"
@@ -34,7 +36,6 @@ std::ifstream& operator>>(std::ifstream& in, Connection& c)
 
 	return in;
 }
-
 std::ofstream& operator<<(std::ofstream& out, const Connection& c)
 {
 	out << 'G' << endl;
@@ -374,6 +375,104 @@ void deleteConnection(std::vector<Connection>& arrCon, std::unordered_map<int, P
 	arrCon.erase(arrCon.begin() + indToDelete);
 
 	cout << "Готово!" << endl;
+}
+
+void convertToAdjacencyMatrix(const std::vector<Connection>& arrCon,
+	std::unordered_map<int, std::vector<int>>& graph)
+{
+	if (arrCon.empty())
+	{
+		return;
+	}
+
+	for (auto& con : arrCon)
+	{
+		if (!graph.contains(con.csInputId))
+		{
+			graph.emplace(con.csInputId, std::vector<int> ());
+		}
+
+		if (!graph.contains(con.csOutputId))
+		{
+			graph.emplace(con.csOutputId, std::vector<int>());
+		}
+
+		graph.at(con.csInputId).push_back(con.csOutputId);
+	}
+
+	/*for (auto& [in, out] : graph)
+	{
+		cout << in << " ";
+
+		for (auto& v : out)
+		{
+			cout << v << " ";
+		}
+
+		cout << endl;
+	}*/
+}
+
+void topologicalSort(std::vector<Connection>& arrCon)
+{
+	if (arrCon.empty())
+	{
+		return;
+	}
+
+	std::unordered_map<int, std::vector<int>> graph;
+	std::vector<int> result;
+
+	convertToAdjacencyMatrix(arrCon, graph);
+
+	int n = graph.size();
+
+	std::vector<int> inCount(n, 0);
+
+	for (auto& [thisVert, verts] : graph) 
+	{
+		for (int vert : verts) {
+			inCount[vert]++;
+		}
+	}
+
+	std::queue<int> usedVerts;
+
+	for (int i = 0; i < n; ++i) 
+	{
+		if (inCount[i] == 0) 
+		{
+			usedVerts.push(i);
+		}
+	}
+
+	while (!usedVerts.empty()) {
+		int noInVert = usedVerts.front();
+		usedVerts.pop();
+
+		result.push_back(noInVert);
+
+		for (int vert : graph.at(noInVert)) {
+			inCount[vert]--;
+
+			if (inCount[vert] == 0) {
+				usedVerts.push(vert);
+			}
+		}
+	}
+
+	if (result.empty())
+	{
+		cout << "Ну че, доигрался? Теперь иди цикл в графе ищи!" << endl;
+		return;
+	}
+
+	cout << "Топологическая сортировка: " << endl;
+	for (int v : result) 
+	{
+		cout << v << " ";
+	}
+	cout << endl;
 }
 
 void addPipe(std::unordered_map<int, Pipe>& map)

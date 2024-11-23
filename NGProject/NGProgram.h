@@ -33,6 +33,8 @@ void printConnection(const std::vector<Connection> arrCon,
 void deleteConnection(std::vector<Connection>& arrCon, std::unordered_map<int, Pipe>& mapP,
 	std::unordered_map<int, CS>& mapCS);
 
+void topologicalSort(std::vector<Connection>& arrCon);
+
 void addPipe(std::unordered_map<int, Pipe>& map);
 void addCS(std::unordered_map<int, CS>& map);
 

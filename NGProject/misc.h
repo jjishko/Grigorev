@@ -40,6 +40,7 @@ void checkInput(T& var, T left, T right,
 		continue;
 	}
 
+	std::cin.get();
 	std::cerr << var << std::endl;
 }
 
