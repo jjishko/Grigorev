@@ -424,38 +424,49 @@ void topologicalSort(std::vector<Connection>& arrCon)
 	std::vector<int> result;
 
 	convertToAdjacencyMatrix(arrCon, graph);
-
-	int n = graph.size();
-
-	std::vector<int> inCount(n, 0);
+	std::unordered_map<int, int> inCount;
 
 	for (auto& [thisVert, verts] : graph) 
 	{
-		for (int vert : verts) {
-			inCount[vert]++;
+		if (!inCount.contains(thisVert))
+		{
+			inCount.emplace(thisVert, 0);
+		}
+
+		for (int vert : verts) 
+		{
+			if (!inCount.contains(vert))
+			{
+				inCount.emplace(vert, 0);
+			}
+
+			++inCount.at(vert);
 		}
 	}
 
 	std::queue<int> usedVerts;
 
-	for (int i = 0; i < n; ++i) 
+	for (auto [vert, in] : inCount)
 	{
-		if (inCount[i] == 0) 
+		if (in == 0) 
 		{
-			usedVerts.push(i);
+			usedVerts.push(vert);
 		}
 	}
 
-	while (!usedVerts.empty()) {
+	while (!usedVerts.empty()) 
+	{
 		int noInVert = usedVerts.front();
 		usedVerts.pop();
 
 		result.push_back(noInVert);
 
-		for (int vert : graph.at(noInVert)) {
-			inCount[vert]--;
+		for (int vert : graph.at(noInVert)) 
+		{
+			--inCount.at(vert);
 
-			if (inCount[vert] == 0) {
+			if (inCount.at(vert) == 0)
+			{
 				usedVerts.push(vert);
 			}
 		}

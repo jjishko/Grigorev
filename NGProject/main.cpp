@@ -23,7 +23,7 @@ using std::unordered_map;
 
 void printHelp()
 {
-	cout << "Инструкции: " << endl;
+	cout << "Инструкции: " << endl << endl;
 
 	cout << "1 - Добавить трубу" << endl;
 	cout << "2 - Добавить КС" << endl << endl;
