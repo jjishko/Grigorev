@@ -294,9 +294,9 @@ void addConnection(std::vector<Connection>& arrCon, std::unordered_map<int, Pipe
 void printConnection(const Connection& c,
 	const std::unordered_map<int, Pipe>& mapP)
 {
-	std::cout << c.csInputId << " -> "
-		<< mapP.find(c.pipeId)->second.getDiameter()
-		<< " mm -> " << c.csOutputId << endl;
+	std::cout << "ID КС входа: " << c.csInputId << " -> "
+		<< "труба " << c.pipeId << " диаметра " << mapP.find(c.pipeId)->second.getDiameter()
+		<< " mm -> " << "ID КС выхода: " << c.csOutputId << endl;
 }
 
 void printConnection(const std::vector<Connection> arrCon,
@@ -308,9 +308,8 @@ void printConnection(const std::vector<Connection> arrCon,
 		return;
 	}
 
-	cout << "Газопровод будет показан в формате (i -> d mm -> o), "
-		<< "где i/o - ID КС входа/выхода, d - диаметр трубы между ними:"
-		<< endl << endl;
+
+	cout << "Соединения:" << endl << endl;
 
 	for (int i = 0; i < arrCon.size(); ++i)
 	{
@@ -332,10 +331,17 @@ void deleteConnection(std::vector<Connection>& arrCon, std::unordered_map<int, P
 
 	printConnection(arrCon, mapP);
 
-	cout << "Вводите номер соединения, которое хотите удалить: ";
+	cout << "Вводите номер соединения, которое хотите удалить (0 - отмена): "; 
 
 	int indToDelete;
-	checkInput(indToDelete, 1, int(arrCon.size()));
+	checkInput(indToDelete, 0, int(arrCon.size()));
+
+	if (indToDelete == 0)
+	{
+		cout << "Отмена действия" << endl;
+		return;
+	}
+
 	--indToDelete;
 	
 	mapP.at(arrCon.at(indToDelete).pipeId).isInConnection = false;
@@ -377,10 +383,46 @@ void deleteConnection(std::vector<Connection>& arrCon, std::unordered_map<int, P
 	cout << "Готово!" << endl;
 }
 
-void convertToAdjacencyMatrix(const std::vector<Connection>& arrCon,
-	std::unordered_map<int, std::vector<int>>& graph)
+void convertToMatrix(const std::vector<Connection>& arrCon,
+	std::unordered_map<int, std::unordered_map<int, int>>& graph)
 {
 	if (arrCon.empty())
+	{
+		return;
+	}
+
+	std::unordered_set<int> inVerts;
+
+	for (const auto& con : arrCon)
+	{
+		if (!graph.contains(con.csInputId))
+		{
+			graph.emplace(con.csInputId, std::unordered_map<int, int>());
+		}
+
+		graph.at(con.csInputId).emplace(con.csOutputId, 1);
+		inVerts.insert(con.csInputId);
+		inVerts.insert(con.csOutputId);
+	}
+
+	for (auto& vert : inVerts)
+	{
+		if (!graph.contains(vert))
+		{
+			graph.emplace(vert, std::unordered_map<int, int>());
+		}
+
+		for (auto& outVert : inVerts)
+		{
+			if (!graph.at(vert).contains(outVert))
+			{
+				graph.at(vert).emplace(outVert, 0);
+			}
+		}
+	}
+	
+
+	/*if (arrCon.empty())
 	{
 		return;
 	}
@@ -398,19 +440,37 @@ void convertToAdjacencyMatrix(const std::vector<Connection>& arrCon,
 		}
 
 		graph.at(con.csInputId).push_back(con.csOutputId);
-	}
+	}*/
+}
 
-	/*for (auto& [in, out] : graph)
+bool dfs(int vert, std::unordered_map<int, std::unordered_map<int, int>>& graph, 
+	std::unordered_map<int, int>& visited, std::vector<int>& result)
+{
+	visited.at(vert) = 1;
+
+	for (auto& [outVert, status] : graph.at(vert))
 	{
-		cout << in << " ";
-
-		for (auto& v : out)
+		if (status == 0)
 		{
-			cout << v << " ";
+			continue;
 		}
 
-		cout << endl;
-	}*/
+		if (visited[outVert] == 0)
+		{  
+			if (dfs(outVert, graph, visited, result))
+			{
+				return true;  
+			}
+		}
+		else if (visited[outVert] == 1)
+		{  
+			return true;
+		}
+	}
+
+	visited[vert] = 2;
+	result.push_back(vert);
+	return false;
 }
 
 void topologicalSort(std::vector<Connection>& arrCon)
@@ -420,68 +480,58 @@ void topologicalSort(std::vector<Connection>& arrCon)
 		return;
 	}
 
-	std::unordered_map<int, std::vector<int>> graph;
-	std::vector<int> result;
+	std::unordered_map<int, std::unordered_map<int, int>> graph;
+	convertToMatrix(arrCon, graph);
 
-	convertToAdjacencyMatrix(arrCon, graph);
-	std::unordered_map<int, int> inCount;
+	int n = graph.size();
+	std::unordered_map<int, int> visited;
+	
+	int workVert;
+	std::vector<int> topSort, result;
 
-	for (auto& [thisVert, verts] : graph) 
+	for (auto& [inVert, outVerts] : graph)
 	{
-		if (!inCount.contains(thisVert))
+		visited.emplace(inVert, 0);
+
+		if (visited.at(inVert) == 0 && dfs(inVert, graph, visited, topSort))
 		{
-			inCount.emplace(thisVert, 0);
+			cout << "Ну че, доигрался? Теперь иди цикл в графе ищи!" << endl;
+			return;
 		}
 
-		for (int vert : verts) 
-		{
-			if (!inCount.contains(vert))
-			{
-				inCount.emplace(vert, 0);
-			}
-
-			++inCount.at(vert);
-		}
+		topSort.clear();
 	}
+	
+	cout << "Введите ID начальной КС для топологической сортировки: ";
 
-	std::queue<int> usedVerts;
-
-	for (auto [vert, in] : inCount)
+	while (true)
 	{
-		if (in == 0) 
+		checkInput(workVert, 0, INT_MAX);
+		
+		if (!graph.contains(workVert))
 		{
-			usedVerts.push(vert);
+			cout << "Нет КС с заданным ID в газопроводе!" << endl;
+			cout << "Попробуйте еще раз: ";
+
+			continue;
 		}
-	}
 
-	while (!usedVerts.empty()) 
+		break;
+	}
+	
+
+	for (auto& [vert, status] : visited)
 	{
-		int noInVert = usedVerts.front();
-		usedVerts.pop();
-
-		result.push_back(noInVert);
-
-		for (int vert : graph.at(noInVert)) 
-		{
-			--inCount.at(vert);
-
-			if (inCount.at(vert) == 0)
-			{
-				usedVerts.push(vert);
-			}
-		}
+		status = 0;
 	}
 
-	if (result.empty())
-	{
-		cout << "Ну че, доигрался? Теперь иди цикл в графе ищи!" << endl;
-		return;
-	}
+	dfs(workVert, graph, visited, result);
+	std::reverse(result.begin(), result.end());
 
 	cout << "Топологическая сортировка: " << endl;
-	for (int v : result) 
+	for (int vert : result) 
 	{
-		cout << v << " ";
+		cout << vert << " ";
 	}
 	cout << endl;
 }

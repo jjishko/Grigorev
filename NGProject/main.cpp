@@ -19,6 +19,9 @@ using std::unordered_map;
 +- Изменение статуса трубы
 + Сохранение/загрузка соединения
 + Топологическая сортировка
+
+id 
+несколько компонент связности
 */
 
 void printHelp()
@@ -107,6 +110,7 @@ int main()
 			break;
 
 		case 9:
+			printConnection(arrConnection, mapPipe);
 			topologicalSort(arrConnection);
 			break;
 
