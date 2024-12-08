@@ -58,7 +58,6 @@ void saveObjects(const std::unordered_map<int, Pipe>& mapPipe,
 	string fileName;
 
 	cout << "Введите название файла или путь (без расширения и пробелов): ";
-	char a = cin.get();
 	cin >> std::ws;
 	inputLine(fileName, cin);
 
@@ -214,17 +213,19 @@ void addConnection(std::vector<Connection>& arrCon, std::unordered_map<int, Pipe
 		return;
 	}
 
+	bool isExisting;
 	Connection newC;
 	int inputId, outputId, diameter;
 
 	printCS(mapCS);
+	
 	cout << "Введите последовательно через Enter "
 		<< "ID КС входа и ID КС выхода:" << endl;
 
 	while (true)
 	{
 		checkInput(inputId, 0, INT_MAX);
-		
+
 		if (!mapCS.contains(inputId))
 		{
 			std::cout << "Нет КС с заданным id!" << std::endl
@@ -247,6 +248,22 @@ void addConnection(std::vector<Connection>& arrCon, std::unordered_map<int, Pipe
 		}
 
 		break;
+	}
+
+	isExisting = false;
+	for (const auto& c : arrCon)
+	{
+		if (c.csInputId == inputId && c.csOutputId == outputId)
+		{
+			isExisting = true;
+			break;
+		}
+	}
+
+	if (isExisting)
+	{
+		cout << "Труба между заданными КС уже существует!" << endl;
+		return;
 	}
 
 	newC.csInputId = inputId;
@@ -296,7 +313,8 @@ void printConnection(const Connection& c,
 {
 	std::cout << "ID КС входа: " << c.csInputId << " -> "
 		<< "труба " << c.pipeId << " диаметра " << mapP.find(c.pipeId)->second.getDiameter()
-		<< " mm -> " << "ID КС выхода: " << c.csOutputId << endl;
+		<< " mm и длины "  << mapP.find(c.pipeId)->second.getLength() 
+		<< " m -> ID КС выхода: " << c.csOutputId << endl;
 }
 
 void printConnection(const std::vector<Connection> arrCon,
@@ -384,7 +402,7 @@ void deleteConnection(std::vector<Connection>& arrCon, std::unordered_map<int, P
 }
 
 void convertToMatrix(const std::vector<Connection>& arrCon,
-	std::unordered_map<int, std::unordered_map<int, int>>& graph)
+	const std::unordered_map<int, Pipe>& mapPipe, graphMatrix& graph)
 {
 	if (arrCon.empty())
 	{
@@ -400,7 +418,8 @@ void convertToMatrix(const std::vector<Connection>& arrCon,
 			graph.emplace(con.csInputId, std::unordered_map<int, int>());
 		}
 
-		graph.at(con.csInputId).emplace(con.csOutputId, 1);
+		graph.at(con.csInputId).emplace(con.csOutputId, 
+			mapPipe.at(con.pipeId).getLength());
 		inVerts.insert(con.csInputId);
 		inVerts.insert(con.csOutputId);
 	}
@@ -443,7 +462,7 @@ void convertToMatrix(const std::vector<Connection>& arrCon,
 	}*/
 }
 
-bool dfs(int vert, std::unordered_map<int, std::unordered_map<int, int>>& graph, 
+bool dfs(int vert, graphMatrix& graph, 
 	std::unordered_map<int, int>& visited, std::vector<int>& result)
 {
 	visited.at(vert) = 1;
@@ -473,15 +492,157 @@ bool dfs(int vert, std::unordered_map<int, std::unordered_map<int, int>>& graph,
 	return false;
 }
 
-void topologicalSort(std::vector<Connection>& arrCon)
+void restorePath(graphMatrix& graph, const std::unordered_map<int, int>& distances,
+	int minPath, std::vector<int>& path, int currentVert)
+{
+	if (minPath == 0)
+	{
+		return;
+	}
+
+	for (auto& [inVert, outVerts] : graph)
+	{
+		if (outVerts.at(currentVert) == 0)
+		{
+			continue;
+		}
+
+		if (minPath - outVerts.at(currentVert) == distances.at(inVert))
+		{
+			path.push_back(inVert);
+			minPath -= outVerts.at(currentVert);
+			restorePath(graph, distances, minPath, path, inVert);
+
+			if (minPath == 0)
+			{
+				return;
+			}
+		}
+	}
+}
+
+void findShortestPath(const std::vector<Connection>& arrCon,
+	const std::unordered_map<int, Pipe>& mapPipe)
 {
 	if (arrCon.empty())
 	{
 		return;
 	}
 
-	std::unordered_map<int, std::unordered_map<int, int>> graph;
-	convertToMatrix(arrCon, graph);
+	int startVert, endVert;
+
+	graphMatrix graph;
+	convertToMatrix(arrCon, mapPipe, graph);
+
+	cout << "Введите ID КС, являющейся началом пути: ";
+
+	while (true)
+	{
+		checkInput(startVert, 0, INT_MAX);
+
+		if (!graph.contains(startVert))
+		{
+			cout << "Нет КС с заданным ID в газопроводе!" << endl;
+			cout << "Попробуйте еще раз: ";
+
+			continue;
+		}
+
+		break;
+	}
+
+	cout << "Введите ID КС, являющейся концом пути: ";
+
+	while (true)
+	{
+		checkInput(endVert, 0, INT_MAX);
+
+		if (!graph.contains(endVert) || endVert == startVert)
+		{
+			cout << "Нет КС с заданным ID в газопроводе!" << endl;
+			cout << "Попробуйте еще раз: ";
+
+			continue;
+		}
+
+		break;
+	}
+
+	std::unordered_map<int, int> distances;
+
+	for (const auto& [inVert, outVerts] : graph)
+	{
+		distances.emplace(inVert, (startVert == inVert ? 0 : INT_MAX));
+	}
+
+	std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>,
+	std::greater<std::pair<int, int>>> usingVerts;
+	usingVerts.push({0, startVert});
+
+	int currentDistance;
+	int currentVert;
+
+	while (!usingVerts.empty()) 
+	{
+		currentDistance = usingVerts.top().first;
+		currentVert = usingVerts.top().second;
+		usingVerts.pop();
+
+		if (currentDistance > distances[currentVert])
+		{
+			continue;
+		}
+
+		for (const auto& [vert, outVerts] : graph)
+		{
+			if (graph.at(currentVert).at(vert) != 0 && 
+				distances.at(vert) > distances.at(currentVert) + graph.at(currentVert).at(vert))
+			{
+				distances.at(vert) = distances.at(currentVert) + graph.at(currentVert).at(vert);
+				usingVerts.push({distances.at(vert), vert});
+			}
+		}
+
+		if (currentVert == endVert)
+		{
+			break;
+		}
+	}
+
+	if (distances.at(endVert) == INT_MAX)
+	{
+		cout << "Невозможно проложить указанный путь!" << endl;
+	}
+	else
+	{
+		std::vector<int> path;
+		path.push_back(endVert);
+		restorePath(graph, distances, distances.at(endVert), path, endVert);
+		std::reverse(path.begin(), path.end());
+		
+		cout << "Кратчайшее расстояние от КС " << startVert << " до КС "
+			<< endVert << ": ";
+		cout << distances.at(endVert) << "m" << endl;
+		cout << "Путь: ";
+
+		for (const auto& vert : path)
+		{
+			cout << vert << " ";
+		}
+		cout << endl;
+	}
+}
+
+void topologicalSort(const std::vector<Connection>& arrCon, 
+	const std::unordered_map<int, Pipe>& mapPipe)
+{
+	if (arrCon.empty())
+	{
+		return;
+	}
+
+	graphMatrix graph;
+	convertToMatrix(arrCon, mapPipe, graph);
 
 	int n = graph.size();
 	std::unordered_map<int, int> visited;

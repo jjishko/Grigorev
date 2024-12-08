@@ -1,4 +1,7 @@
 P
+New Pipe 8
+8 500 1000 0 1
+P
 pipe1
 0 1000 300 0 0
 P
@@ -11,9 +14,6 @@ P
 New Pipe 3
 3 500 1000 0 1
 P
-New Pipe 4
-4 500 700 0 0
-P
 New Pipe 5
 5 500 1000 0 1
 P
@@ -23,11 +23,17 @@ P
 New Pipe 7
 7 500 500 0 1
 P
-New Pipe 8
-8 500 1000 0 1
+sdfsfdsdf
+10 10 500 0 1
 P
-New Pipe 9
-9 500 1000 0 1
+bigPipe
+11 2000 700 0 1
+P
+miniminipipe
+12 1 500 0 1
+P
+largePipe
+13 1500 1400 0 1
 C
 cs1
 0 10 3 30 1
@@ -60,4 +66,6 @@ G
 G
 2 3 8
 G
-3 5 9
+3 4 10
+G
+3 5 13

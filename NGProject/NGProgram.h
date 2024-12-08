@@ -11,6 +11,8 @@
 #include "Pipe.h"
 #include "CS.h"
 
+using graphMatrix = std::unordered_map<int, std::unordered_map<int, int>>;
+
 struct Connection
 {
 	int csInputId;
@@ -33,7 +35,10 @@ void printConnection(const std::vector<Connection> arrCon,
 void deleteConnection(std::vector<Connection>& arrCon, std::unordered_map<int, Pipe>& mapP,
 	std::unordered_map<int, CS>& mapCS);
 
-void topologicalSort(std::vector<Connection>& arrCon);
+void findShortestPath(const std::vector<Connection>& arrCon,
+	const std::unordered_map<int, Pipe>& mapPipe);
+void topologicalSort(const std::vector<Connection>& arrCon,
+	const std::unordered_map<int, Pipe>& mapPipe);
 
 void addPipe(std::unordered_map<int, Pipe>& map);
 void addCS(std::unordered_map<int, CS>& map);

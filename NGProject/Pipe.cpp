@@ -109,6 +109,11 @@ int Pipe::getID()
 	return this->id;
 }
 
+int Pipe::getLength() const
+{
+	return this->length;
+}
+
 int Pipe::getDiameter() const
 {
 	return this->diameter;

@@ -39,10 +39,12 @@ void printHelp()
 	cout << "6 - Создать соединение (добавить в газопровод)" << endl;
 	cout << "7 - Показать весь газопровод" << endl;
 	cout << "8 - Удалить соединение" << endl;
-	cout << "9 - Топологическая сортировка" << endl << endl;
+	cout << "9 - Топологическая сортировка" << endl;
+	cout << "10 - Найти кратчайший путь" << endl;
+	cout << "11 - Найти максимальный поток в сети" << endl << endl;
 
-	cout << "10 - Сохранить" << endl;
-	cout << "11 - Загрузить" << endl << endl;
+	cout << "12 - Сохранить" << endl;
+	cout << "13 - Загрузить" << endl << endl;
 
 	cout << "0 - Выход" << endl << endl;
 }
@@ -71,7 +73,7 @@ int main()
 	while (true)
 	{
 		cout << "Введите нoмер: ";
-		checkInput(choice, 0, 11);
+		checkInput(choice, 0, 13);
 
 		system("cls");
 
@@ -111,14 +113,23 @@ int main()
 
 		case 9:
 			printConnection(arrConnection, mapPipe);
-			topologicalSort(arrConnection);
+			topologicalSort(arrConnection, mapPipe);
 			break;
 
 		case 10:
-			saveObjects(mapPipe, mapCS, arrConnection);
+			printConnection(arrConnection, mapPipe);
+			findShortestPath(arrConnection, mapPipe);
 			break;
 
 		case 11:
+
+			break;
+
+		case 12:
+			saveObjects(mapPipe, mapCS, arrConnection);
+			break;
+
+		case 13:
 			loadObjects(mapPipe, mapCS, arrConnection);
 			break;
 
