@@ -12,13 +12,13 @@
 #include "CS.h"
 
 using graphMatrix = std::unordered_map<int, std::unordered_map<int, int>>;
+using capacityMatrix = std::unordered_map<int, std::unordered_map<int, float>>;
 
 struct Connection
 {
 	int csInputId;
 	int csOutputId;
 	int pipeId;
-	//static std::vector<int> pipesInConnection;
 };
 
 std::ifstream& operator >> (std::ifstream& in, Connection& c);
@@ -38,6 +38,8 @@ void deleteConnection(std::vector<Connection>& arrCon, std::unordered_map<int, P
 void findShortestPath(const std::vector<Connection>& arrCon,
 	const std::unordered_map<int, Pipe>& mapPipe);
 void topologicalSort(const std::vector<Connection>& arrCon,
+	const std::unordered_map<int, Pipe>& mapPipe);
+void findMaxFlow(const std::vector<Connection>& arrCon,
 	const std::unordered_map<int, Pipe>& mapPipe);
 
 void addPipe(std::unordered_map<int, Pipe>& map);

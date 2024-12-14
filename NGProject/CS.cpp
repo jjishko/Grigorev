@@ -46,6 +46,7 @@ std::ostream& operator<<(std::ostream& out, const CS& cs)
 	out << "Кол-во цехов: " << cs.guildCount << endl;
 	out << "Кол-во цехов в работе: " << cs.guildCountInWork << endl;
 	out << "Коэффициент эффективности: " << cs.efficiency << endl;
+	out << "Участвует в газопроводе: " << (cs.isInConnection ? "Да" : "Нет") << endl;
 	out << endl;
 
 	return out;

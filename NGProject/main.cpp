@@ -122,7 +122,8 @@ int main()
 			break;
 
 		case 11:
-
+			printConnection(arrConnection, mapPipe);
+			findMaxFlow(arrConnection, mapPipe);
 			break;
 
 		case 12:

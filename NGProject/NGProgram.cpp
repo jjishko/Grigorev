@@ -207,7 +207,7 @@ void loadObjects(std::unordered_map<int, Pipe>& mapPipe,
 void addConnection(std::vector<Connection>& arrCon, std::unordered_map<int, Pipe>& mapP,
 	std::unordered_map<int, CS>& mapCS)
 {
-	if (mapCS.empty() || mapCS.size() < 2)
+	if (mapP.empty() || mapCS.size() < 2)
 	{
 		cout << "Нельзя создать соединение: недостаточно КС!" << endl;
 		return;
@@ -401,6 +401,7 @@ void deleteConnection(std::vector<Connection>& arrCon, std::unordered_map<int, P
 	cout << "Готово!" << endl;
 }
 
+
 void convertToMatrix(const std::vector<Connection>& arrCon,
 	const std::unordered_map<int, Pipe>& mapPipe, graphMatrix& graph)
 {
@@ -418,7 +419,7 @@ void convertToMatrix(const std::vector<Connection>& arrCon,
 			graph.emplace(con.csInputId, std::unordered_map<int, int>());
 		}
 
-		graph.at(con.csInputId).emplace(con.csOutputId, 
+		graph.at(con.csInputId).emplace(con.csOutputId,
 			mapPipe.at(con.pipeId).getLength());
 		inVerts.insert(con.csInputId);
 		inVerts.insert(con.csOutputId);
@@ -439,28 +440,80 @@ void convertToMatrix(const std::vector<Connection>& arrCon,
 			}
 		}
 	}
-	
 
-	/*if (arrCon.empty())
+	/*if (arrcon.empty())
 	{
 		return;
 	}
 
-	for (auto& con : arrCon)
+	for (auto& con : arrcon)
+	{
+		if (!graph.contains(con.csinputid))
+		{
+			graph.emplace(con.csinputid, std::vector<int> ());
+		}
+
+		if (!graph.contains(con.csoutputid))
+		{
+			graph.emplace(con.csoutputid, std::vector<int>());
+		}
+
+		graph.at(con.csinputid).push_back(con.csoutputid);
+	}*/
+}
+
+float calculateFlow(float length, int diameter)
+{
+	if (length == 0)
+	{
+		return 0;
+	}
+
+	return sqrt(float(pow(diameter, 5)) / length);
+}
+
+void convertToFlowMatrix(const std::vector<Connection>& arrCon,
+	const std::unordered_map<int, Pipe>& mapPipe, capacityMatrix& graph)
+{
+	if (arrCon.empty())
+	{
+		return;
+	}
+
+	std::unordered_set<int> inVerts;
+
+	for (const auto& con : arrCon)
 	{
 		if (!graph.contains(con.csInputId))
 		{
-			graph.emplace(con.csInputId, std::vector<int> ());
+			graph.emplace(con.csInputId, std::unordered_map<int, float>());
 		}
 
-		if (!graph.contains(con.csOutputId))
+		graph.at(con.csInputId).emplace(con.csOutputId, calculateFlow
+			(mapPipe.at(con.pipeId).getLength(),
+			mapPipe.at(con.pipeId).getDiameter()));
+
+		inVerts.insert(con.csInputId);
+		inVerts.insert(con.csOutputId);
+	}
+
+	for (auto& vert : inVerts)
+	{
+		if (!graph.contains(vert))
 		{
-			graph.emplace(con.csOutputId, std::vector<int>());
+			graph.emplace(vert, std::unordered_map<int, float>());
 		}
 
-		graph.at(con.csInputId).push_back(con.csOutputId);
-	}*/
+		for (auto& outVert : inVerts)
+		{
+			if (!graph.at(vert).contains(outVert))
+			{
+				graph.at(vert).emplace(outVert, 0);
+			}
+		}
+	}
 }
+
 
 bool dfs(int vert, graphMatrix& graph, 
 	std::unordered_map<int, int>& visited, std::vector<int>& result)
@@ -633,6 +686,7 @@ void findShortestPath(const std::vector<Connection>& arrCon,
 	}
 }
 
+
 void topologicalSort(const std::vector<Connection>& arrCon, 
 	const std::unordered_map<int, Pipe>& mapPipe)
 {
@@ -696,6 +750,139 @@ void topologicalSort(const std::vector<Connection>& arrCon,
 	}
 	cout << endl;
 }
+
+bool findFlow(capacityMatrix& graph, capacityMatrix& flow,
+	std::unordered_map<int, int>& parent, int source, int stock)
+{
+	std::queue<int> q;
+	q.push(source);
+
+	int workVert;
+
+	while (!q.empty())
+	{
+		workVert = q.front();
+		q.pop();
+
+		for (auto& [inVert, outVerts] : graph)
+		{
+			if (inVert != workVert && parent.at(inVert) == -1 &&
+				graph.at(workVert).at(inVert) - flow.at(workVert).at(inVert) > 0)
+			{
+				parent.at(inVert) = workVert;
+
+				if (inVert == stock)
+				{
+					return true;
+				}
+
+				q.push(inVert);
+			}
+		}
+	}
+
+	return false;
+}
+
+void findMaxFlow(const std::vector<Connection>& arrCon,
+	const std::unordered_map<int, Pipe>& mapPipe)
+{
+	if (arrCon.empty())
+	{
+		return;
+	}
+
+	int source, stock;
+
+	capacityMatrix graph;
+	capacityMatrix flow;
+	convertToFlowMatrix(arrCon, mapPipe, graph);
+
+	cout << "Введите ID КС начала (источник): ";
+
+	while (true)
+	{
+		checkInput(source, 0, INT_MAX);
+
+		if (!graph.contains(source))
+		{
+			cout << "Нет КС с заданным ID в газопроводе!" << endl;
+			cout << "Попробуйте еще раз: ";
+
+			continue;
+		}
+
+		break;
+	}
+
+	cout << "Введите ID КС конца (сток): ";
+
+	while (true)
+	{
+		checkInput(stock, 0, INT_MAX);
+
+		if (!graph.contains(stock) || stock == source)
+		{
+			cout << "Нет КС с заданным ID в газопроводе!" << endl;
+			cout << "Попробуйте еще раз: ";
+
+			continue;
+		}
+
+		break;
+	}
+
+	float maxFlow = 0;
+	std::unordered_map<int, int> parent;
+
+	for (auto& [inVert, outVerts] : graph)
+	{
+		flow.emplace(inVert, outVerts);
+		parent.emplace(inVert, -1);
+
+		for (auto& [outVert, status] : flow.at(inVert))
+		{
+			if (outVert == source)
+			{
+				status = FLT_MAX;
+			}
+			else
+			{
+				status = 0;
+			}
+		}
+	}
+
+	float pathFlow;
+	int workVert;
+	
+	while (findFlow(graph, flow, parent, source, stock))
+	{
+		pathFlow = FLT_MAX;
+
+		for (int i = stock; source != i; i = parent[i])
+		{
+			workVert = parent.at(i);
+			pathFlow = std::min(pathFlow, graph.at(workVert).at(i) - flow.at(workVert).at(i));
+		}
+
+		for (int i = stock; i != source; i = parent[i])
+		{
+			workVert = parent.at(i);
+			flow.at(workVert).at(i) += pathFlow;
+
+			if (flow.contains(i) && flow.at(i).contains(workVert))
+			{
+				flow[i][workVert] -= pathFlow;
+			}
+		}
+
+		maxFlow += pathFlow;
+	}
+
+	cout << "Максимальный поток: " << maxFlow << endl;
+}
+
 
 void addPipe(std::unordered_map<int, Pipe>& map)
 {

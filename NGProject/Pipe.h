@@ -14,7 +14,7 @@ public:
 	bool isInConnection = false;
 
 	int getID();
-	int getLength() const;
+	float getLength() const;
 	int getDiameter() const;
 	int getStatus() const;
 

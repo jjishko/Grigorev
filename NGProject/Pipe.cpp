@@ -53,6 +53,7 @@ std::ostream& operator<<(std::ostream& out, const Pipe& p)
 	out << "Длина трубы: " << p.length << endl;
 	out << "Диаметр трубы: " << p.diameter << endl;
 	out << "Статус: " << (p.isUnderRepair ? "В ремонте" : "Работает") << endl;
+	out << "Участвует в газопроводе: " << (p.isInConnection ? "Да" : "Нет") << endl;
 	out << endl;
 
 	return out;
@@ -109,7 +110,7 @@ int Pipe::getID()
 	return this->id;
 }
 
-int Pipe::getLength() const
+float Pipe::getLength() const
 {
 	return this->length;
 }
